@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Footprint Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and Box-Sizing */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: relative;
+            background-color: black;
+            overflow: hidden;
+        }
+
+        /* Background Video */
+        .background-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        /* Gradient Overlay */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+
+        /* Login Section */
+        .login-container {
+            position: absolute;
+            top: 4%;
+            right: 2%;
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .login-description {
+            margin-right: 10px; /* Space between text and button */
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .login-button {
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            border-radius: 12px;
+            padding: 8px 16px;
+            border: 2px solid white;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .login-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Clickable Cards */
+        .info-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 80%;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .info-box:hover {
+            transform: translateY(-5px);
+            opacity: 0.8;
+        }
+
+        /* Fade-in Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .info-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .info-container {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <video autoplay loop muted class="background-video">
+        <source src="{{ url_for('static', filename='images/frontpage1.mp4') }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="overlay"></div>
+
+    <!-- Login Section -->
+    <div class="login-container">
+        <div class="login-description">For calculation and more details, please log in.</div>
+        <a href="{{ url_for('login') }}" class="login-button">Log In</a>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>Carbon Foot Track</h1>
+        <p>Calculate, Analyze, and Reduce Your Impact on the Environment</p>
+    </div>
+
+    <!-- Clickable Information Boxes -->
+    <div class="info-container">
+        <a href="{{ url_for('df1') }}" class="info-box">What is Carbon Footprint?</a>
+        <a href="{{ url_for('df2') }}" class="info-box">How is it Produced?</a>
+        <a href="{{ url_for('df3') }}" class="info-box">How Can You Reduce It?</a>
+        <a href="{{ url_for('df4') }}" class="info-box">What is Carbon Credit?</a>
+    </div>
+</body>
+</html>

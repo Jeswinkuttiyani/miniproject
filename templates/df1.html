@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is Carbon Footprint?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #56B4BE;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #4a9ca6;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('df1') }}">What is Carbon Footprint?</a>
+        <a href="{{ url_for('df2') }}">How is it Produced?</a>
+        <a href="{{ url_for('df3') }}">How to Reduce?</a>
+        <a href="{{ url_for('df4') }}">What is Carbon Credit?</a>
+    </div>
+    <div class="content">
+        <h1>WHAT IS CARBON FOOTPRINT?</h1>
+        <p>A carbon footprint is the total amount of greenhouse gases, primarily carbon dioxide (CO₂), emitted directly or indirectly by an 
+        individual, organization, event, or product. It is measured in terms of CO₂-equivalent emissions and results from activities like 
+        transportation, energy consumption, manufacturing, and food production. The larger the carbon footprint, the greater the contribution 
+        to global warming and climate change. Reducing carbon footprints can be achieved through energy efficiency, using renewable energy, 
+        minimizing waste, and adopting sustainable lifestyle choices such as using public transport, consuming less meat, and supporting eco
+        -friendly products.</p>
+
+        <h2>What types of carbon footprints are there?</h2>
+        <p>Depending on the activity we're analyzing, distinct types of carbon footprint can be identified, considering the activity's typical 
+        GHG emissions per year.</p>
+
+        <h3>Individual carbon footprint</h3>
+        <p>It's based on the consumption habits of the person and takes into account GHG emissions associated with their means of transportation, 
+        electricity use for heating and cooling at home, eating habits, consumption of goods, recycling habits, etc.</p>
+
+        <h3>Product footprint</h3>
+        <p>This includes the GHG emissions from the stages of raw material extraction, production process, required energy generation, product 
+        transformation for other companies, the customer's usage, and its treatment as waste as well as the transportation between stages.</p>
+
+        <h3>Corporate footprint</h3>
+        <p>It includes the GHG emissions inventory related to a company or organization's operations. It's the main basis for identifying energy 
+        efficiency measures within the organization as well as joint action measures with other companies in the sector.</p>
+    </div>
+</body>
+</html>

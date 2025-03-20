@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How is Carbon Footprint Produced?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #56B4BE;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #4a9ca6;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('df1') }}">What is Carbon Footprint?</a>
+        <a href="{{ url_for('df2') }}">How is it Produced?</a>
+        <a href="{{ url_for('df3') }}">How to Reduce?</a>
+        <a href="{{ url_for('df4') }}">What is Carbon Credit?</a>
+    </div>
+    <div class="content">
+        <h1 style="text-decoration: underline;">HOW CARBON FOOTPRINT IS PRODUCED</h1>
+        <p>A carbon footprint is generated through various human activities that release greenhouse gases, mainly carbon dioxide (CO₂), methane (CH₄), and nitrous oxide (N₂O).
+             These gases contribute to global warming and climate change. Below is a detailed explanation of the key sources:</p>
+          
+    <h2>1. Burning Fossil Fuels (Main Source)</h2>
+    <p><strong>How it happens:</strong> When we burn coal, oil, or natural gas for energy, it releases CO₂ into the air. This happens in power plants, vehicles, and heating systems.</p>
+    <p><strong>Examples:</strong></p>
+    <ul>
+        <li><strong>Electricity production</strong> – Coal and gas power plants burn fossil fuels to generate electricity.</li>
+        <li><strong>Transportation</strong> – Cars, trucks, ships, and airplanes burn gasoline or diesel, releasing CO₂.</li>
+        <li><strong>Heating and cooking</strong> – Homes and industries use natural gas, which emits CO₂ when burned.</li>
+    </ul>
+    <p class="impact">🔹 Impact: The biggest contributor to carbon footprints. One liter of gasoline burned in a car emits about 2.3 kg of CO₂.</p>
+
+    <h2>2. Industrial Processes</h2>
+    <p><strong>How it happens:</strong> Factories emit CO₂ and other gases when making products like cement, steel, and chemicals.</p>
+    <p><strong>Examples:</strong></p>
+    <ul>
+        <li><strong>Cement production</strong> – Heating limestone releases large amounts of CO₂.</li>
+        <li><strong>Steel and aluminum manufacturing</strong> – Uses coal-fired furnaces, producing CO₂.</li>
+        <li><strong>Plastics and chemicals</strong> – Made from fossil fuels, releasing emissions.</li>
+    </ul>
+    <p class="impact">🔹 Impact: Industrial emissions account for 21% of global CO₂ emissions.</p>
+
+    <h2>3. Agriculture & Food Production</h2>
+    <p><strong>How it happens:</strong> Farming activities release methane (CH₄) from livestock and nitrous oxide (N₂O) from fertilizers.</p>
+    <p><strong>Examples:</strong></p>
+    <ul>
+        <li><strong>Livestock (cows, sheep, goats)</strong> – Digestive processes produce methane, a gas 25 times more powerful than CO₂.</li>
+        <li><strong>Fertilizers & pesticides</strong> – Used to grow crops, but release nitrous oxide, which is 300 times stronger than CO₂.</li>
+        <li><strong>Deforestation for farming</strong> – Cutting down trees reduces CO₂ absorption.</li>
+    </ul>
+    <p class="impact">🔹 Impact: Producing 1 kg of beef emits 27 kg of CO₂, making meat production a major contributor to carbon footprints.</p>
+
+    <h2>4. Waste Management</h2>
+    <p><strong>How it happens:</strong> When waste is not properly managed, it releases greenhouse gases.</p>
+    <p><strong>Examples:</strong></p>
+    <ul>
+        <li><strong>Landfills</strong> – Organic waste decomposes, releasing methane (CH₄).</li>
+        <li><strong>Incineration</strong> – Burning waste produces CO₂.</li>
+    </ul>
+    <p class="impact">🔹 Impact: Food waste alone is responsible for about 8% of global greenhouse gas emissions.</p>
+
+    <h2>5. Consumer Goods & Supply Chains</h2>
+    <p><strong>How it happens:</strong> The products we buy, use, and throw away have hidden carbon emissions from production and transportation.</p>
+    <p><strong>Examples:</strong></p>
+    <ul>
+        <li><strong>Manufacturing</strong> – Factories consume energy and release CO₂.</li>
+        <li><strong>Transportation</strong> – Goods are shipped worldwide using fossil-fuel-powered vehicles.</li>
+        <li><strong>Packaging waste</strong> – Plastic and paper production require energy and cause emissions.</li>
+    </ul>
+    <p class="impact">🔹 Impact: A single new smartphone has a carbon footprint of 80-90 kg of CO₂ from production to disposal.</p>
+    </div>
+</body>
+</html>

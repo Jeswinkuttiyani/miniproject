@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Reduce Carbon Footprint?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #56B4BE;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #4a9ca6;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('df1') }}">What is Carbon Footprint?</a>
+        <a href="{{ url_for('df2') }}">How is it Produced?</a>
+        <a href="{{ url_for('df3') }}">How to Reduce?</a>
+        <a href="{{ url_for('df4') }}">What is Carbon Credit?</a>
+    </div>
+    <div class="content">
+        <h1 style="text-decoration: underline;">HOW TO REDUCE CARBON FOOTPRINT?</h1>
+        <p>Without a doubt, responsible consumption is one our greatest allies, but there's even more we can do to try to cut our carbon footprint. 
+        Here are a few tips we can put into practice in our day-to-day lives to reduce it:</p>
+       
+        <h4>Consume local seasonal products</h4>
+        <p>By consuming proximity or zero-mile products, we help reduce the CO2 emissions derived from the refrigeration or transportation of food 
+        products. What's more, we're contributing to boosting the local economy. It's all benefits!</p>
+
+        <h4>Use high energy efficiency appliances</h4>
+        <p>Next-generation appliances are increasingly more sustainable and efficient. Also, checking the labeling of the appliance you're going to 
+        buy is essential to know if they're made following sustainability standards throughout the value chain. Go to our page on energy efficiency to get in the know.</p>
+        <h4>Use water and electricity efficiently</h4>
+
+        <p>We can try to save energy at home by unplugging any electronic devices we're not using. Also, if we maintain the temperature between 18ºC 
+        and 23ºC, we'll save on heating. Similarly, we should make the most of natural light during the day to save on our power bill.We can also 
+        save hundreds of liters of water by turning off the tap while soaping up or brushing our teeth.</p>
+
+        <h4>Use sustainable transportation whenever possible</h4>
+        <p>Using public transportation or other solutions such as bicycles or electric scooters contributes to reducing the carbon footprint, while 
+        improving mobility in cities and raising the citizens' quality of life index.Also, other sustainable mobility alternatives, such as carsharing
+        , help reduce traffic congestion and save on private vehicle maintenance costs.</p>
+
+        <h2 style="text-decoration: underline;" >Measures companies can adopt to reduce their carbon footprint</h2>
+        <P>Companies and organizations can also implement measures aimed at cutting their carbon footprint by always giving priority to actions that 
+        have a greater impact and introducing guidelines that create a carbon footprint reduction culture, both in their daily operations as well as 
+        in the management of the product life cycle.</P>
+
+        <h4>Promoting energy efficiency in all areas</h4>
+        <p>Optimizing production processes and operational excellence not only involves a better use of energy and a resulting reduction in emissions, 
+        it also leads to a better maintenance of equipment, fewer breakdowns, and improved safety.</p>
+
+        <h4>Leveraging renewable energy sources</h4>
+        <p>Nowadays, the evolution of the energy mix enables companies to implement different types of renewable energy into their management and 
+        processes. There is a wide array of renewable energy sources to choose from based on individual needs, location, and demand.</p>
+
+        <h4>Promoting the circular economy and applying its principles</h4>
+        <p>The circular economy has a wide range of benefits. It protects the environment, reduces CO2 emissions, and minimizes the consumption of 
+        natural resources. It benefits the local economy by promoting production models based, for example, on reverse logistics or reusing waste. 
+        It also creates jobs and stimulates the development of a more innovative and competitive industrial model.</p>
+    </div>
+</body>
+</html>

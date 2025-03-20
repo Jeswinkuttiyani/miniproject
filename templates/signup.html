@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background: url('{{ url_for("static", filename="images/background2.jpg") }}') center/cover no-repeat;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 900px;
+            background-color: #020302;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .image-section {
+            width: 50%;
+            background: url('{{ url_for("static", filename="images/pic6.jpg") }}') center/cover no-repeat;
+        }
+
+        .form-section {
+            width: 50%;
+            padding: 40px;
+            color: #fff;
+        }
+
+        .form-section h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .form-section p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: none;
+            background-color: #222;
+            color: #fff;
+        }
+
+        .signup-button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .signup-button:hover {
+            background-color: #2980b9;
+        }
+
+        .login-link {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 90%;
+            }
+
+            .image-section {
+                width: 100%;
+                height: 200px;
+            }
+
+            .form-section {
+                width: 100%;
+            }
+        }
+        /* Add this CSS to style the suggested usernames section */
+.suggestions-section {
+    margin-bottom: 20px;
+}
+
+.suggestions-section p {
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+.suggestions-section ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.suggestions-section ul li {
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.suggestions-section ul li:hover {
+    background-color: #2980b9;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-section"></div>
+        <div class="form-section">
+            <h2>Sign Up</h2>
+            <p>Create your account. It's free and only takes a minute.</p>
+
+            <!-- Display error message -->
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
+
+            <!-- Display suggested usernames -->
+{% if suggestions %}
+<div class="suggestions-section">
+    <p>Suggested usernames:</p>
+    <ul>
+        {% for suggestion in suggestions %}
+            <li>{{ suggestion }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+            <form action="/signup" method="POST">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="signup-button">Sign Up</button>
+
+                <div class="login-link">
+                    Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

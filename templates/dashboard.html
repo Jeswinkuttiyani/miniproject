@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Track Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .header {
+            width: 100%;
+            background-color: #6ab3c9;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 36px;
+            font-weight: bold;
+            font-family: 'Montserrat', sans-serif;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #6ab3c9;
+            height: 100vh;
+            padding-top: 80px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 999;
+        }
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px;
+            font-size: 18px;
+            border-bottom: 1px solid #4a90e2;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar a:hover {
+            background-color: #4a90e2;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 100px 20px 20px;
+            width: calc(100% - 250px);
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container-wrapper {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        .expanded {
+            width: 80%;
+            height: 50vh;
+            position: fixed;
+            top: 20%;
+            left: 10%;
+            z-index: 1001;
+            background-color: white;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+        }
+        .container h2 {
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        .container p {
+            font-size: 16px;
+            font-weight: 400;
+            color: #666;
+        }
+        canvas {
+            max-width: 100%;
+            height: 200px;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 400px;
+            height: 200px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body onclick="collapseContainer(event)">
+    <div class="header">Carbon Track</div>
+    <div class="sidebar">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('calculator') }}">Calculation</a>
+        <a href="{{ url_for('tasks') }}">Tasks</a>
+        <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
+
+        <a href="#">Chatbot (Coming Soon)</a>
+ 
+        <a href="{{ url_for('logout') }}">Log Out</a>
+        </div>
+        
+    <div class="content">
+        <div class="container-wrapper">
+            <!-- Container 1: User Information -->
+            <div class="container" id="user-info" onclick="expandContainer(event, this)">
+                <button class="close-btn" onclick="collapseContainer(event, this.parentElement)">×</button>
+                <h2>profile</h2>
+                <p id="userName">Name: <strong>{{ session['user'] }}</strong> </p>
+                <p id="totalFootprint">Total Carbon Footprint: <b>{{ result.total }} kg CO₂</b></p>
+            </div>
+
+            <!-- Container 2: Today's Carbon Footprint -->
+            <div class="container" id="today-footprint" onclick="expandContainer(event, this)">
+                <button class="close-btn" onclick="collapseContainer(event, this.parentElement)">×</button>
+                <h2>Today's Carbon Footprint</h2>
+                <p id="transport">Transport: {{ result.breakdown.transport }} kg CO₂</p>
+                <p id="energy">Energy:{{ result.breakdown.energy }}kg CO₂</p>
+                <p id="food">Food: {{ result.breakdown.food }}kg CO₂</p>
+                <p id="waste"> Waste: {{ result.breakdown.waste }}kg CO₂</p>
+                <p id="water"> Water:{{ result.breakdown.water }}kg CO₂</p> 
+            </div>
+
+            <!-- Container 3: Weekly Carbon Footprint -->
+            <div class="container" id="weekly-footprint" onclick="expandContainer(event, this)">
+                <button class="close-btn" onclick="collapseContainer(event, this.parentElement)">×</button>
+                <h2>Weekly Carbon Footprint</h2>
+                <div class="chart-container">
+                    <canvas id="weeklyFootprintChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Container 4: Carbon Footprint Breakdown -->
+            <div class="container" id="footprint-breakdown" onclick="expandContainer(event, this)">
+                <button class="close-btn" onclick="collapseContainer(event, this.parentElement)">×</button>
+                <h2>Carbon Footprint Breakdown</h2>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function expandContainer(event, element) {
+            event.stopPropagation();
+            document.querySelectorAll('.container').forEach(container => {
+                container.classList.remove('expanded');
+            });
+            element.classList.add('expanded');
+        }
+        function collapseContainer(event, element) {
+            event.stopPropagation();
+            if (element) {
+                element.classList.remove('expanded');
+            } else {
+                document.querySelectorAll('.container').forEach(container => {
+                    container.classList.remove('expanded');
+                });
+            }
+        }
+
+        // Initialize the bar chart for Container 4
+        var ctxBar = document.getElementById('barChart').getContext('2d');
+        var barChart = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Transport', 'Energy', 'Food', 'Waste', 'Water'],
+                datasets: [{
+                    label: 'Carbon Footprint Breakdown (kg CO2)',
+                    data: [{{ result.breakdown.transport }}, {{ result.breakdown.energy }}, {{ result.breakdown.food }}, {{ result.breakdown.waste }}, {{ result.breakdown.water }}],
+                    backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Initialize the line chart for Container 3
+        var ctxLine = document.getElementById('weeklyFootprintChart').getContext('2d');
+        var lineChart = new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: {{ dates | tojson }},
+                datasets: [{
+                    label: 'Total Carbon Footprint (kg CO2)',
+                    data: {{ totals | tojson }},
+                    borderColor: '#6ab3c9',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Carbon Footprint (kg CO2)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

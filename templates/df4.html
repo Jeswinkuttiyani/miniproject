@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is Carbon Credit?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #56B4BE;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #4a9ca6;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('df1') }}">What is Carbon Footprint?</a>
+        <a href="{{ url_for('df2') }}">How is it Produced?</a>
+        <a href="{{ url_for('df3') }}">How to Reduce?</a>
+        <a href="{{ url_for('df4') }}">What is Carbon Credit?</a>
+    </div>
+    <div class="content">
+        <h1 style="text-decoration: underline;">WHAT ARE CARBON CREDITS?</h1>
+        <p>A carbon credit is a permit that allows an entity (such as a company or country) to emit a certain amount of greenhouse gases, 
+        typically one metric ton of carbon dioxide (CO₂) or its equivalent. It is part of a system designed to limit, reduce, and offset 
+        carbon emissions to combat climate change. Organizations can buy, sell, or trade these credits in carbon markets.</p>
+        
+        <h3>How Carbon Credits Work</h3>
+        <p>Carbon credits operate within a cap-and-trade system or voluntary carbon markets. Here's how they function:</p>
+        
+        <h4>1. Setting an Emission Limit (Cap)</h4>
+        <p>Governments or regulatory bodies set a limit on how much CO₂ a company, industry, or country can emit. 
+        This is known as the carbon cap.</p>
+        
+        <h4>2. Allocating or Purchasing Carbon Credits</h4>
+        <p>If a company emits less CO₂ than its allocated limit, it earns extra carbon credits. If a company emits more than its limit, 
+        it must buy carbon credits from others to offset its excess emissions.</p>
+        
+        <h4>3. Trading Carbon Credits</h4>
+        <p>Companies that have unused carbon credits can sell them to companies that need more credits. This creates a carbon market where 
+        organizations trade credits based on supply and demand.</p>
+        
+        <h4>4. Carbon Offsetting</h4>
+        <p>Companies or individuals can also purchase carbon credits to fund environmental projects that reduce CO₂, such as:</p>
+        <ul>
+            <li>Reforestation (planting trees)</li>
+            <li>Renewable energy projects (solar, wind)</li>
+            <li>Methane capture projects (from landfills or agriculture)</li>
+        </ul>
+        <p>By investing in these projects, emissions are offset, balancing out the carbon footprint.</p>
+        
+        <h3>Example of Carbon Credit Usage</h3>
+        <p>A company is allowed to emit 1,000 tons of CO₂ per year but ends up emitting 1,200 tons. It can:</p>
+        <ul>
+            <li>Buy 200 carbon credits from another company that emitted less than its cap.</li>
+            <li>Invest in a carbon offset project that removes 200 tons of CO₂ from the atmosphere.</li>
+        </ul>
+        
+        <h3>Benefits of Carbon Credits</h3>
+        <ul>
+            <li>✔ Encourages companies to reduce emissions</li>
+            <li>✔ Promotes investment in green energy and sustainability projects</li>
+            <li>✔ Provides a financial incentive for businesses to be more eco-friendly</li>
+            <li>✔ Helps countries meet international climate targets like the Paris Agreement</li>
+        </ul>
+    </div>
+</body>
+</html>
