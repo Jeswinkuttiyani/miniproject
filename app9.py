@@ -8,6 +8,17 @@ from datetime import datetime, timedelta
 import re
 import numpy as np
 from collections import defaultdict
+import json
+def generate_suggestions(footprint_data):
+    """Fallback function to generate basic suggestions."""
+    return {
+        "transport": [{"title": "Use public transport", "description": "Switch to public transport to reduce emissions.", "impact": "high"}],
+        "energy": [{"title": "Switch to LED bulbs", "description": "LED bulbs consume less energy.", "impact": "medium"}],
+        "food": [{"title": "Adopt a vegetarian diet", "description": "Reduce meat consumption to lower your carbon footprint.", "impact": "high"}],
+        "waste": [{"title": "Recycle waste", "description": "Recycle to minimize landfill contributions.", "impact": "medium"}],
+        "water": [{"title": "Fix leaks", "description": "Repair leaky faucets to save water.", "impact": "low"}],
+        "general": [{"title": "Plant trees", "description": "Planting trees helps offset carbon emissions.", "impact": "high"}]
+    }
 
 # --- Flask App Initialization ---
 app = Flask(__name__)
@@ -583,8 +594,6 @@ def calculate_footprint(data):
             "water": water_footprint
         }
     }
-
-# Add this new route to your Flask app
 @app.route('/suggestions', methods=['GET'])
 def suggestions():
     if "user" not in session:
@@ -599,12 +608,11 @@ def suggestions():
     )
     
     if not latest_footprint:
-        # If no footprint data exists, redirect to calculator
         flash("Please calculate your carbon footprint first to get personalized suggestions.")
         return redirect(url_for("calculator"))
     
-    # Generate suggestions based on footprint data
-    suggestions = generate_suggestions(latest_footprint)
+    # Generate AI-based suggestions
+    suggestions = generate_ai_suggestions(latest_footprint)
     
     # Get user's footprint breakdown for display
     footprint_breakdown = latest_footprint.get("breakdown", {})
@@ -617,162 +625,63 @@ def suggestions():
         total_footprint=total_footprint
     )
 
-def generate_suggestions(footprint_data):
-    """Generate personalized suggestions based on user's carbon footprint data."""
-    suggestions = {
-        "transport": [],
-        "energy": [],
-        "food": [],
-        "waste": [],
-        "water": [],
-        "general": []
-    }
+def generate_ai_suggestions(footprint_data):
+    """Generate AI-powered personalized suggestions based on user's carbon footprint data."""
+    # Prepare the prompt for the AI
+    prompt = f"""
+    You are an environmental sustainability expert. Based on the following carbon footprint data:
+    {json.dumps(footprint_data, indent=2)}
     
-    breakdown = footprint_data.get("breakdown", {})
-    raw_data = footprint_data.get("raw_data", {})
+    Generate personalized, actionable suggestions to help reduce the carbon footprint. 
+    Consider the user's lifestyle, highest impact areas, and provide specific recommendations.
     
-    # Transport suggestions
-    transport_footprint = breakdown.get("transport", 0)
-    if transport_footprint > 5:
-        suggestions["transport"].append({
-            "title": "Consider public transportation",
-            "description": "Using public transportation can reduce your transport emissions by up to 60%.",
-            "impact": "high"
-        })
-        suggestions["transport"].append({
-            "title": "Switch to cycling or walking for short trips",
-            "description": "For distances under 5km, walking or cycling produces zero emissions and improves your health.",
-            "impact": "medium"
-        })
+    Format your response as a JSON object with these categories:
+    - transport
+    - energy
+    - food
+    - waste
+    - water
+    - general
     
-    # Check for car usage
-    car_usage = False
-    car_type = None
-    fuel_type = None
+    For each suggestion, include:
+    - title: Short actionable title
+    - description: Detailed explanation (2-3 sentences)
+    - impact: high/medium/low
+    - confidence: AI's confidence score (0-100)
+    - estimated_reduction: Estimated CO2 reduction in kg/year
     
-    for transport_item in raw_data.get("transport", []):
-        if transport_item.get("mode") == "car":
-            car_usage = True
-            car_type = transport_item.get("car_type")
-            fuel_type = transport_item.get("fuel_type")
-            break
+    Prioritize suggestions that would have the highest impact based on the user's data.
+    """
     
-    if car_usage:
-        if fuel_type != "electric":
-            suggestions["transport"].append({
-                "title": "Consider an electric vehicle",
-                "description": "Electric vehicles can reduce your transport emissions by up to 70% compared to conventional vehicles.",
-                "impact": "high"
-            })
-        if car_type in ["suv", "luxury"]:
-            suggestions["transport"].append({
-                "title": "Consider a more fuel-efficient vehicle",
-                "description": f"Your {car_type} vehicle has higher emissions. A compact or medium-sized car could reduce your footprint.",
-                "impact": "medium"
-            })
-    
-    # Energy suggestions
-    energy_footprint = breakdown.get("energy", 0)
-    if energy_footprint > 3:
-        suggestions["energy"].append({
-            "title": "Switch to renewable energy sources",
-            "description": "Renewable energy can reduce your electricity footprint by up to 90%.",
-            "impact": "high"
-        })
+    # Call your preferred AI API (OpenAI, Anthropic, etc.)
+    try:
+        # Example using OpenAI (you'll need to install openai package)
+        import openai
         
-    for energy_item in raw_data.get("energy", []):
-        electricity_source = energy_item.get("electricity_source")
-        if electricity_source == "non_renewable_electricity":
-            suggestions["energy"].append({
-                "title": "Install solar panels",
-                "description": "Solar panels can significantly reduce your dependence on non-renewable electricity.",
-                "impact": "high"
-            })
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful environmental sustainability assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1500
+        )
         
-        cooking_fuel = energy_item.get("cooking_fuel")
-        if cooking_fuel in ["wood", "lpg"]:
-            suggestions["energy"].append({
-                "title": "Switch to electric cooking",
-                "description": f"Your {cooking_fuel} cooking produces higher emissions. Electric cooking with renewable electricity is cleaner.",
-                "impact": "medium"
-            })
-    
-    # Food suggestions
-    food_footprint = breakdown.get("food", 0)
-    diet_type = raw_data.get("food", {}).get("diet")
-    
-    if diet_type == "meat_diet":
-        suggestions["food"].append({
-            "title": "Reduce meat consumption",
-            "description": "Reducing meat consumption, especially red meat, can lower your food carbon footprint by up to 50%.",
-            "impact": "high"
-        })
-    elif diet_type == "vegetarian_diet":
-        suggestions["food"].append({
-            "title": "Consider plant-based alternatives",
-            "description": "Incorporating more plant-based foods can further reduce your food carbon footprint.",
-            "impact": "medium"
-        })
-    
-    suggestions["food"].append({
-        "title": "Buy local and seasonal produce",
-        "description": "Local food requires less transportation and seasonal produce requires less energy-intensive farming methods.",
-        "impact": "medium"
-    })
-    
-    # Waste suggestions
-    waste_footprint = breakdown.get("waste", 0)
-    if waste_footprint > 2:
-        suggestions["waste"].append({
-            "title": "Implement composting",
-            "description": "Composting organic waste can reduce your waste footprint and create nutrient-rich soil for plants.",
-            "impact": "high"
-        })
-        suggestions["waste"].append({
-            "title": "Practice zero-waste shopping",
-            "description": "Bring your own containers and bags to reduce packaging waste.",
-            "impact": "medium"
-        })
-    
-    # Water suggestions
-    water_footprint = breakdown.get("water", 0)
-    if water_footprint > 1.5:
-        suggestions["water"].append({
-            "title": "Install water-efficient fixtures",
-            "description": "Low-flow showerheads and faucets can reduce your water usage by up to 50%.",
-            "impact": "high"
-        })
-        suggestions["water"].append({
-            "title": "Collect rainwater for gardening",
-            "description": "Using rainwater for your garden can significantly reduce your water footprint.",
-            "impact": "medium"
-        })
-    
-    # General suggestions (always included)
-    suggestions["general"].append({
-        "title": "Track your carbon footprint regularly",
-        "description": "Regular monitoring helps you stay aware of your impact and motivates sustainable choices.",
-        "impact": "low"
-    })
-    suggestions["general"].append({
-        "title": "Join a local sustainability group",
-        "description": "Community efforts can amplify your individual impact and provide support for sustainable living.",
-        "impact": "medium"
-    })
-    
-    # Prioritize suggestions based on highest impact areas
-    sorted_breakdown = sorted(breakdown.items(), key=lambda x: x[1], reverse=True)
-    priority_areas = [area for area, value in sorted_breakdown if value > 0]
-    
-    # Add this information to help user focus on high impact areas
-    if priority_areas:
-        suggestions["general"].append({
-            "title": f"Focus on reducing your {priority_areas[0]} footprint",
-            "description": f"Your {priority_areas[0]} usage contributes the most to your carbon footprint. Small changes here will have the biggest impact.",
-            "impact": "high"
-        })
-    
-    return suggestions
+        # Parse the AI response
+        ai_response = response.choices[0].message.content
+        suggestions = json.loads(ai_response)
+        
+        # Add some metadata
+        suggestions["generated_at"] = datetime.datetime.now().isoformat()
+        suggestions["ai_model"] = "gpt-4"
+        
+        return suggestions
+        
+    except Exception as e:
+        print(f"AI suggestion generation failed: {str(e)}")
+        # Fall back to rule-based suggestions if AI fails
+        return generate_suggestions(footprint_data)
 
 @app.route('/offsetting_sites')
 def offsetting_sites():

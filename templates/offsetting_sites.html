@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carbon Track - Offsetting Sites</title>
+  <style>
+    :root {
+      --primary-color: #2E7D32;
+      --secondary-color: #4CAF50;
+      --accent-color: #81C784;
+      --light-bg: #F1F8E9;
+      --dark-text: #263238;
+      --light-text: #FFFFFF;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: var(--dark-text);
+    }
+    
+    .container {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      background-color: var(--primary-color);
+      color: var(--light-text);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: auto;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--light-text);
+      transition: background-color 0.3s;
+    }
+    
+    .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      background-color: var(--accent-color);
+      color: var(--dark-text);
+      margin-top: 20px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s;
+      width: 100%;
+    }
+    
+    .action-btn:hover {
+      background-color: #5CD65C;
+    }
+    
+    /* Main Content */
+    .main-content {
+      padding: 20px 30px;
+      position: relative;
+    }
+    
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+    }
+    
+    .user-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .user-info p {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+    }
+    
+    .btn-secondary {
+      background-color: #e0e0e0;
+      color: var(--dark-text);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #d0d0d0;
+    }
+    
+    /* Offsetting Sites Specific Styles */
+    .intro-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+    
+    .intro-title {
+      font-size: 24px;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+    
+    .sites-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .site-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      transition: transform 0.3s;
+      border-top: 4px solid var(--secondary-color);
+    }
+    
+    .site-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .site-logo {
+      height: 60px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    
+    .site-logo svg {
+      max-height: 100%;
+      max-width: 100%;
+    }
+    
+    .site-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+    
+    .site-description {
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    
+    .site-features {
+      margin-top: 15px;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .feature-icon {
+      color: var(--secondary-color);
+    }
+    
+    .visit-btn {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      margin-top: 10px;
+      transition: background-color 0.3s;
+    }
+    
+    .visit-btn:hover {
+      background-color: var(--secondary-color);
+    }
+    
+    .disclaimer {
+      background-color: var(--light-bg);
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 30px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Carbon Track
+      </div>
+      
+      <div class="nav-links">
+        <a href="{{ url_for('dashboard') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+          Dashboard
+        </a>
+        <a href="{{ url_for('calculator') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 22h20"></path>
+            <path d="M5.6 18l8-14L21 10.6"></path>
+          </svg>
+          Calculation
+        </a>
+        <a href="{{ url_for('offsetting_sites') }}" class="nav-link active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V6l-8-4-8 4v6c0 6 8 10 8 10"></path>
+              <path d="M15 9l-6 6"></path>
+              <path d="M9 9l6 6"></path>
+            </svg>
+            Offsetting Sites
+          </a>
+        <a href="{{ url_for('tasks') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v8"></path>
+            <path d="m4.93 10.93 1.41 1.41"></path>
+            <path d="M2 18h2"></path>
+            <path d="M20 18h2"></path>
+            <path d="m19.07 10.93-1.41 1.41"></path>
+            <path d="M22 22H2"></path>
+            <path d="M16 6 8 14l-4 4"></path>
+            <path d="m8 6 8 8"></path>
+          </svg>
+          Tasks
+        </a>
+        <a href="{{ url_for('leaderboard') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          Leaderboard
+        </a>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="top-bar">
+        <div class="user-profile">
+          <div class="avatar">{{ session['user'][0:2] }}</div>
+          <div class="user-info">
+            <h3>{{ session['user'] }}</h3>
+            <p>Carbon Tracker</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Introduction Section -->
+      <div class="intro-card">
+        <h2 class="intro-title">Carbon Offsetting Sites</h2>
+        <p>Carbon offsetting is a way to compensate for your emissions by funding projects that reduce carbon dioxide in the atmosphere. The following platforms allow you to offset your carbon footprint while also earning rewards, cashback, or other incentives.</p>
+        <p>By using these services, you can make a positive impact on the environment while also benefiting financially.</p>
+      </div>
+      
+      <!-- Offsetting Sites Grid -->
+      <div class="sites-grid">
+        <!-- Site 1 -->
+        <div class="site-card">
+          <div class="site-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              <circle cx="12" cy="2" r="1"></circle>
+            </svg>
+          </div>
+          <h3 class="site-name">Ecologi</h3>
+          <p class="site-description">Ecologi helps you offset your carbon footprint through verified tree planting and climate projects. Subscribe monthly and watch your virtual forest grow while earning impact rewards.</p>
+          <div class="site-features">
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Tree planting visualized</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Verified carbon projects</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Monthly impact reports</span>
+            </div>
+          </div>
+          <a href="https://ecologi.com" target="_blank" class="visit-btn">Visit Site</a>
+        </div>
+        
+        <!-- Site 2 -->
+        <div class="site-card">
+          <div class="site-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+              <path d="M6 12h12"></path>
+              <path d="M12 18l6-6"></path>
+              <path d="M12 6v12"></path>
+            </svg>
+          </div>
+          <h3 class="site-name">KlimaDAO</h3>
+          <p class="site-description">KlimaDAO turns your carbon reduction efforts into cryptocurrency rewards. Purchase carbon credits on the blockchain and earn KLIMA tokens that can be staked for additional returns.</p>
+          <div class="site-features">
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Crypto rewards (KLIMA tokens)</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Blockchain verified carbon credits</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Staking opportunities</span>
+            </div>
+          </div>
+          <a href="https://www.klimadao.finance" target="_blank" class="visit-btn">Visit Site</a>
+        </div>
+        
+        <!-- Site 3 -->
+        <div class="site-card">
+          <div class="site-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 22h20"></path>
+              <path d="M3 10c4-2 4-2 8-2s4 0 8 2"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="12" y1="22" x2="12" y2="10"></line>
+              <path d="M12 2v4"></path>
+              <path d="M8 6V4"></path>
+              <path d="M16 6V4"></path>
+            </svg>
+          </div>
+          <h3 class="site-name">Cloverly</h3>
+          <p class="site-description">Cloverly connects your everyday spending to carbon offsetting. Integrate with your business or use their API to automatically offset the carbon footprint of your operations and purchases.</p>
+          <div class="site-features">
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>API for automatic offsetting</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Business integration</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Transaction-level impact</span>
+            </div>
+          </div>
+          <a href="https://www.cloverly.com" target="_blank" class="visit-btn">Visit Site</a>
+        </div>
+        
+        <!-- Site 4 -->
+        <div class="site-card">
+          <div class="site-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <path d="M12 18v-6"></path>
+              <path d="M8 15h8"></path>
+            </svg>
+          </div>
+          <h3 class="site-name">NCX</h3>
+          <p class="site-description">NCX offers a marketplace where landowners are paid to delay timber harvests, creating carbon credits you can purchase. Their Natural Capital Exchange creates transparent forest carbon credits.</p>
+          <div class="site-features">
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Forest carbon marketplace</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Transparent credit tracking</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Support for local landowners</span>
+            </div>
+          </div>
+          <a href="https://ncx.com" target="_blank" class="visit-btn">Visit Site</a>
+        </div>
+        
+        <!-- Site 5 -->
+        <div class="site-card">
+          <div class="site-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
+              <path d="M9 8h10"></path>
+              <path d="M9 12h8"></path>
+              <path d="M9 16h6"></path>
+            </svg>
+          </div>
+          <h3 class="site-name">TreeCard</h3>
+          <p class="site-description">TreeCard offers a wooden debit card that plants trees with merchant fees. Use their card for everyday purchases and they'll automatically fund reforestation projects with the interchange fees.</p>
+          <div class="site-features">
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Wooden debit card</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Zero user fees</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Tree planting tracker</span>
+            </div>
+          </div>
+          <a href="https://www.treecard.org" target="_blank" class="visit-btn">Visit Site</a>
+        </div>
+        
+        <!-- Site 6 -->
+        <div class="site-card">
+          <div class="site-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
+              <path d="M9 18c-4.51 2-5-2-7-2"></path>
+            </svg>
+          </div>
+          <h3 class="site-name">Wren</h3>
+          <p class="site-description">Wren calculates your carbon footprint and helps you offset it through a monthly subscription. Your funds go to verified climate projects, and you'll receive regular updates on their progress.</p>
+          <div class="site-features">
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Carbon footprint calculator</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Monthly subscription</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Project updates & transparency</span>
+            </div>
+          </div>
+          <a href="https://www.wren.co" target="_blank" class="visit-btn">Visit Site</a>
+        </div>
+        
+        <!-- Site 7 -->
+        <div class="site-card">
+          <div class="site-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </div>
+          <h3 class="site-name">Patch</h3>
+          <p class="site-description">Patch is an API-first carbon credit marketplace focusing on frontier carbon removal technologies. Businesses can integrate carbon removal into their operations and offer it to customers.</p>
+          <div class="site-features">
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>API integration</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Frontier carbon removal</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Business solutions</span>
+            </div>
+          </div>
+          <a href="https://www.patch.io" target="_blank" class="visit-btn">Visit Site</a>
+        </div>
+        
+        <!-- Site 8 -->
+        <div class="site-card">
+          <div class="site-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+            </svg>
+          </div>
+          <h3 class="site-name">JustCarbon</h3>
+          <p class="site-description">JustCarbon tokenizes carbon removal units on the blockchain. Purchase carbon credits as digital tokens (JCR) and trade them on exchanges or hold them as an investment in climate action.</p>
+          <div class="site-features">
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Carbon credit tokenization</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Tradeable tokens</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span>Investment potential</span>
+            </div>
+          </div>
+          <a href="https://www.justcarbon.com" target="_blank" class="visit-btn">Visit Site</a>
+        </div>
+      </div>
+      
+      <!-- Disclaimer -->
+      <div class="disclaimer">
+        <p><strong>Disclaimer:</strong> Carbon Track does not endorse any specific offsetting platform and does not receive compensation for listings. Users should conduct their own research before investing money. Reward rates and platform features may change over time.</p>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

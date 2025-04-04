@@ -38,6 +38,10 @@ def is_valid_email(email):
     domain = email.split('@')[-1]
     return domain in ALLOWED_DOMAINS
 
+def is_valid_password(password):
+    # Check if password is at least 6 characters long
+    return len(password) >= 6
+
 def send_otp(email):
     otp = str(randint(100000, 999999))  # Generate 6-digit OTP
     session['otp'] = otp
@@ -94,6 +98,11 @@ def signup():
             error_message = "Invalid or non-approved email domain! Please use a common provider."
             return render_template('signup.html', error=error_message)
 
+         # Check password validity
+        if not is_valid_password(password):
+            error_message = "Password must be at least 6 characters long."
+            return render_template('signup.html', error=error_message)
+        
         # Check for existing email or username
         if users_collection.find_one({"email": email}):
             flash("Email already registered! Please log in.")
@@ -144,6 +153,12 @@ def verify_otp():
             signup_data = session.pop('signup_data', None)
 
             if signup_data:
+
+                # Validate password again as a security measure
+                if not is_valid_password(signup_data['password']):
+                    flash("Invalid password. Password must be at least 6 characters long.")
+                    return redirect(url_for('signup'))
+                
                 # Save the verified user in MongoDB
                 hashed_password = generate_password_hash(signup_data['password'])
                 users_collection.insert_one({
@@ -213,7 +228,7 @@ def dashboard():
         }
 
     # Fetch the last 7 days of carbon footprint data
-    seven_days_ago = datetime.now() - timedelta(days=7)  # Corrected line
+    seven_days_ago = datetime.now() - timedelta(days=7)
     last_7_days_footprints = list(footprints_collection.find({
         "user": user,
         "date": {"$gte": seven_days_ago}
@@ -226,7 +241,7 @@ def dashboard():
         daily_footprints[date_str] = footprint  # Overwrite with the latest entry for the day
 
     # Generate a list of the last 7 days (including today)
-    dates = [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]  # Corrected line
+    dates = [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]
 
     # Prepare data for the line chart
     totals = []
@@ -238,6 +253,42 @@ def dashboard():
 
     return render_template("dashboard.html", result=result, dates=dates, totals=totals)
 
+# --- change password---
+@app.route('/change-password', methods=['POST'])
+def change_password():
+    if "user" not in session:
+        return jsonify({"success": False, "message": "User not logged in."})
+
+    data = request.get_json()
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+
+    # Validate new password
+    if not is_valid_password(new_password):
+        return jsonify({"success": False, "message": "New password must be at least 6 characters long."})
+
+    # Fetch the logged-in user's details
+    user_email = session["user"]
+    user = users_collection.find_one({"email": user_email})
+
+    if not user:
+        return jsonify({"success": False, "message": "User not found."})
+
+    # Verify current password
+    if not check_password_hash(user['password'], current_password):
+        return jsonify({"success": False, "message": "Incorrect current password."})
+
+    # Hash the new password
+    new_hashed_password = generate_password_hash(new_password)
+
+    # Update the password in MongoDB
+    users_collection.update_one(
+        {"email": user_email},
+        {"$set": {"password": new_hashed_password}}
+    )
+
+    return jsonify({"success": True})
+
 # --- Carbon Footprint Calculator Route ---
 @app.route('/calculator', methods=['GET'])
 def calculator():
@@ -245,33 +296,194 @@ def calculator():
         return redirect(url_for("login"))
     return render_template("calculator.html")
 
-# --- Calculate Route (New Page for Results) ---
+# --- Calculate Route (Updated for Multiple Entries) ---
 @app.route('/calculate', methods=['POST'])
 def calculate():
     if "user" not in session:
         return redirect(url_for("login"))
+        
     user = session["user"]
+    
+    # Process multiple transport entries
+    transport_modes = request.form.getlist('transport_mode[]')
+    distances = request.form.getlist('distance[]')
+    car_types = request.form.getlist('car_type[]')
+    fuel_types = request.form.getlist('fuel_type[]')
+    
+    # Process multiple energy entries
+    electricity_sources = request.form.getlist('electricity_source[]')
+    electricity_usages = request.form.getlist('electricity[]')
+    cooking_fuels = request.form.getlist('cooking_fuel[]')
+    cooking_times = request.form.getlist('cooking_time[]')
+    
+    # Process food data
+    diet_type = request.form.get('diet_type', 'none')
+    food_consumed = float(request.form.get('food_consumed', 0))
+    
+    # Process other data
+    waste = float(request.form.get('waste', 0))
+    water = float(request.form.get('water', 0))
+    
+    # Prepare complete data structure
     data = {
-        "transport": {"mode": request.form["transport_mode"], "distance": float(request.form["distance"] or 0)},
-        "energy": {"electricity": float(request.form["electricity"] or 0), "natural_gas": float(request.form["natural_gas"] or 0)},
-        "food": {"diet": request.form["diet_type"]},
-        "waste": {"amount": float(request.form["waste"] or 0)},
-        "water": {"usage": float(request.form["water"] or 0)}
+        "transport": [],
+        "energy": [],
+        "food": {
+            "diet": diet_type,
+            "amount": food_consumed
+        },
+        "waste": {"amount": waste},
+        "water": {"usage": water}
     }
+    
+    # Fill transport data
+    for i in range(len(transport_modes)):
+        if i < len(distances) and transport_modes[i] != 'none':
+            transport_item = {
+                "mode": transport_modes[i],
+                "distance": float(distances[i] or 0)
+            }
+            
+            # Add car-specific details if car is selected
+            if transport_modes[i] == 'car' and i < len(car_types) and i < len(fuel_types):
+                transport_item["car_type"] = car_types[i]
+                transport_item["fuel_type"] = fuel_types[i]
+                
+            data["transport"].append(transport_item)
+    
+    # Fill energy data
+    for i in range(len(electricity_sources)):
+        if i < len(electricity_usages) and i < len(cooking_fuels) and i < len(cooking_times):
+            if electricity_sources[i] != 'none' or cooking_fuels[i] != 'none':
+                energy_item = {
+                    "electricity_source": electricity_sources[i],
+                    "electricity": float(electricity_usages[i] or 0),
+                    "cooking_fuel": cooking_fuels[i],
+                    "cooking_time": float(cooking_times[i] or 0)
+                }
+                data["energy"].append(energy_item)
+    
+    # Calculate footprint
     result = calculate_footprint(data)
-    footprint_data = {"user": user, "date": datetime.now(), "total_footprint": result["total"], "breakdown": result["breakdown"]}
+    footprint_data = {
+        "user": user, 
+        "date": datetime.now(), 
+        "total_footprint": result["total"], 
+        "breakdown": result["breakdown"],
+        "raw_data": data  # Store the raw input data for reference
+    }
+    
     footprints_collection.insert_one(footprint_data)
     return redirect(url_for('dashboard'))
 
 def calculate_footprint(data):
-    factors = {"car": 0.21, "bus": 0.11, "train": 0.06, "flight": 0.25, "electricity": 0.4, "natural_gas": 2.3, "meat_diet": 3.3, "vegetarian_diet": 1.5, "vegan_diet": 0.8, "waste": 0.5, "water": 0.3}
-    transport = data.get("transport", {}).get("distance", 0) * factors.get(data.get("transport", {}).get("mode", "car"), 0)
-    energy = data.get("energy", {}).get("electricity", 0) * factors["electricity"] + data.get("energy", {}).get("natural_gas", 0) * factors["natural_gas"]
-    food = factors[data.get("food", {}).get("diet", "meat_diet")]
-    waste = data.get("waste", {}).get("amount", 0) * factors["waste"]
-    water = data.get("water", {}).get("usage", 0) * factors["water"]
-    total_footprint = transport + energy + food + waste + water
-    return {"total": total_footprint, "breakdown": {"transport": transport, "energy": energy, "food": food, "waste": waste, "water": water}}
+    # Base emission factors
+    base_factors = {
+        "none": 0,
+        "car": 0.21,  # Base car emission factor
+        "public_transport": 0.11,
+        "train": 0.06,
+        "flight": 0.25,
+        "marine": 0.30,  # New factor for marine transport
+        
+        # Electricity source factors
+        "non_renewable_electricity": 0.5,
+        "renewable_electricity": 0.1,
+        "mixed_electricity": 0.3,
+        
+        # Cooking fuel factors
+        "lpg": 0.3,
+        "wood": 0.5,
+        "electric": 0.1,  # This depends on electricity source
+        "natural_gas": 0.2,
+        
+        "meat_diet": 3.3,
+        "vegetarian_diet": 1.5,
+        "vegan_diet": 0.8,
+        "waste": 0.5,
+        "water": 0.3
+    }
+    
+    # Car type multipliers
+    car_type_factors = {
+        "compact": 0.8,   # More efficient than base
+        "medium": 1.0,    # Base reference
+        "suv": 1.5,       # Less efficient
+        "luxury": 1.8     # Least efficient
+    }
+    
+    # Fuel type multipliers
+    fuel_type_factors = {
+        "petrol": 1.0,    # Base reference
+        "diesel": 1.1,    # Slightly higher emissions
+        "electric": 0.3,  # Much lower emissions
+        "hybrid": 0.7,    # Lower emissions
+        "cng": 0.8        # Lower emissions than petrol
+    }
+    
+    # Initialize footprint components
+    transport_footprint = 0
+    energy_footprint = 0
+    
+    # Calculate transport footprint for all transport entries
+    for transport_item in data.get("transport", []):
+        transport_mode = transport_item.get("mode", "none")
+        distance = transport_item.get("distance", 0)
+        
+        if transport_mode == "car":
+            # Get car type and fuel type from data
+            car_type = transport_item.get("car_type", "medium")
+            fuel_type = transport_item.get("fuel_type", "petrol")
+            
+            # Calculate adjusted emission factor for the specific car and fuel type
+            car_factor = base_factors["car"] * car_type_factors.get(car_type, 1.0) * fuel_type_factors.get(fuel_type, 1.0)
+            transport_footprint += distance * car_factor
+        else:
+            # For other transport modes, use the base factor
+            transport_footprint += distance * base_factors.get(transport_mode, 0)
+    
+    # Calculate energy footprint for all energy entries
+    for energy_item in data.get("energy", []):
+        electricity_source = energy_item.get("electricity_source", "non_renewable")
+        electricity_usage = energy_item.get("electricity", 0)
+        cooking_fuel = energy_item.get("cooking_fuel", "lpg")
+        cooking_time = energy_item.get("cooking_time", 0)
+        
+        # Calculate electricity footprint based on source
+        electricity_factor = base_factors.get(f"{electricity_source}_electricity", base_factors["non_renewable_electricity"])
+        electricity_footprint = electricity_usage * electricity_factor
+        
+        # Calculate cooking footprint
+        cooking_factor = base_factors.get(cooking_fuel, 0.3)
+        # For electric cooking, factor in the electricity source
+        if cooking_fuel == "electric":
+            cooking_factor *= electricity_factor / base_factors["non_renewable_electricity"]
+        
+        cooking_footprint = cooking_time * cooking_factor
+        
+        # Add to total energy footprint
+        energy_footprint += electricity_footprint + cooking_footprint
+    
+    # Calculate other footprint components
+    diet_type = data.get("food", {}).get("diet", "meat_diet")
+    food_amount = data.get("food", {}).get("amount", 1)
+    food_footprint = base_factors.get(diet_type, base_factors["meat_diet"]) * food_amount
+    
+    waste_footprint = data.get("waste", {}).get("amount", 0) * base_factors["waste"]
+    water_footprint = data.get("water", {}).get("usage", 0) * base_factors["water"]
+    
+    total_footprint = transport_footprint + energy_footprint + food_footprint + waste_footprint + water_footprint
+    
+    return {
+        "total": total_footprint, 
+        "breakdown": {
+            "transport": transport_footprint, 
+            "energy": energy_footprint, 
+            "food": food_footprint, 
+            "waste": waste_footprint, 
+            "water": water_footprint
+        }
+    }
 
 # Define eco-friendly tasks and their Earth Coins
 ECO_TASKS = {
@@ -308,6 +520,7 @@ ECO_TASKS = {
     "upgrade_energy_efficient_appliances": {"name": "Upgrade to Energy-Efficient Appliances", "points": 8},
     "support_sustainable_brands": {"name": "Support Sustainable Brands", "points": 4},
 }
+
 @app.route('/tasks', methods=['GET', 'POST'])
 def tasks():
     if "user" not in session:
@@ -343,6 +556,7 @@ def tasks():
     total_coins = sum(task.get('points_earned', 0) for task in user_tasks)
 
     return render_template("tasks.html", eco_tasks=ECO_TASKS, user_tasks=user_tasks, total_coins=total_coins)
+
 @app.route('/leaderboard')
 def leaderboard():
     # Fetch all users
@@ -360,7 +574,7 @@ def leaderboard():
 
         # Add user data to the leaderboard
         leaderboard_data.append({
-            "name": user["name"],
+            "username": user["username"],
             "email": user_email,
             "total_coins": total_coins  # Ensure this is always a number
         })

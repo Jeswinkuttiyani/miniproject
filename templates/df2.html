@@ -1,104 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How is Carbon Footprint Produced?</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .sidebar {
-            height: 100%;
-            width: 250px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background-color: #56B4BE;
-            padding-top: 20px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-        }
-        .sidebar a {
-            padding: 15px 20px;
-            text-decoration: none;
-            font-size: 18px;
-            color: white;
-            display: block;
-        }
-        .sidebar a:hover {
-            background-color: #4a9ca6;
-        }
-        .content {
-            margin-left: 250px;
-            padding: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How is Carbon Footprint Produced?</title>
+  <style>
+    :root {
+      --primary-color: #2E7D32;
+      --secondary-color: #4CAF50;
+      --accent-color: #81C784;
+      --light-bg: #F1F8E9;
+      --dark-text: #263238;
+      --light-text: #FFFFFF;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: var(--dark-text);
+    }
+    
+    .container {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      background-color: var(--primary-color);
+      color: var(--light-text);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: auto;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--light-text);
+      transition: background-color 0.3s;
+    }
+    
+    .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Main Content */
+    .main-content {
+      padding: 30px 40px;
+    }
+    
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .page-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 25px;
+    }
+    
+    .content-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+    
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+    
+    .sub-section-title {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--secondary-color);
+      margin: 20px 0 10px 0;
+    }
+    
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+    
+    ul {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+    
+    li {
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    
+    .impact {
+      padding: 10px;
+      background-color: var(--light-bg);
+      border-left: 4px solid var(--secondary-color);
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="sidebar">
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('df1') }}">What is Carbon Footprint?</a>
-        <a href="{{ url_for('df2') }}">How is it Produced?</a>
-        <a href="{{ url_for('df3') }}">How to Reduce?</a>
-        <a href="{{ url_for('df4') }}">What is Carbon Credit?</a>
-    </div>
-    <div class="content">
-        <h1 style="text-decoration: underline;">HOW CARBON FOOTPRINT IS PRODUCED</h1>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Carbon Track
+      </div>
+      
+      <div class="nav-links">
+        <a href="{{ url_for('home') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          Home
+        </a>
+        <a href="{{ url_for('df1') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          What is Carbon Footprint?
+        </a>
+        <a href="{{ url_for('df2') }}" class="nav-link active">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            <line x1="6" y1="1" x2="6" y2="4"></line>
+            <line x1="10" y1="1" x2="10" y2="4"></line>
+            <line x1="14" y1="1" x2="14" y2="4"></line>
+          </svg>
+          How is it Produced?
+        </a>
+        <a href="{{ url_for('df3') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"></path>
+            <path d="M12 5v14"></path>
+          </svg>
+          How to Reduce?
+        </a>
+        <a href="{{ url_for('df4') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+            <circle cx="12" cy="12" r="2"></circle>
+            <path d="M6 12h.01M18 12h.01"></path>
+          </svg>
+          What is Carbon Credit?
+        </a>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <h1 class="page-title">How is Carbon Footprint Produced?</h1>
+      
+      <div class="content-card">
         <p>A carbon footprint is generated through various human activities that release greenhouse gases, mainly carbon dioxide (CO₂), methane (CH₄), and nitrous oxide (N₂O).
              These gases contribute to global warming and climate change. Below is a detailed explanation of the key sources:</p>
-          
-    <h2>1. Burning Fossil Fuels (Main Source)</h2>
-    <p><strong>How it happens:</strong> When we burn coal, oil, or natural gas for energy, it releases CO₂ into the air. This happens in power plants, vehicles, and heating systems.</p>
-    <p><strong>Examples:</strong></p>
-    <ul>
-        <li><strong>Electricity production</strong> – Coal and gas power plants burn fossil fuels to generate electricity.</li>
-        <li><strong>Transportation</strong> – Cars, trucks, ships, and airplanes burn gasoline or diesel, releasing CO₂.</li>
-        <li><strong>Heating and cooking</strong> – Homes and industries use natural gas, which emits CO₂ when burned.</li>
-    </ul>
-    <p class="impact">🔹 Impact: The biggest contributor to carbon footprints. One liter of gasoline burned in a car emits about 2.3 kg of CO₂.</p>
-
-    <h2>2. Industrial Processes</h2>
-    <p><strong>How it happens:</strong> Factories emit CO₂ and other gases when making products like cement, steel, and chemicals.</p>
-    <p><strong>Examples:</strong></p>
-    <ul>
-        <li><strong>Cement production</strong> – Heating limestone releases large amounts of CO₂.</li>
-        <li><strong>Steel and aluminum manufacturing</strong> – Uses coal-fired furnaces, producing CO₂.</li>
-        <li><strong>Plastics and chemicals</strong> – Made from fossil fuels, releasing emissions.</li>
-    </ul>
-    <p class="impact">🔹 Impact: Industrial emissions account for 21% of global CO₂ emissions.</p>
-
-    <h2>3. Agriculture & Food Production</h2>
-    <p><strong>How it happens:</strong> Farming activities release methane (CH₄) from livestock and nitrous oxide (N₂O) from fertilizers.</p>
-    <p><strong>Examples:</strong></p>
-    <ul>
-        <li><strong>Livestock (cows, sheep, goats)</strong> – Digestive processes produce methane, a gas 25 times more powerful than CO₂.</li>
-        <li><strong>Fertilizers & pesticides</strong> – Used to grow crops, but release nitrous oxide, which is 300 times stronger than CO₂.</li>
-        <li><strong>Deforestation for farming</strong> – Cutting down trees reduces CO₂ absorption.</li>
-    </ul>
-    <p class="impact">🔹 Impact: Producing 1 kg of beef emits 27 kg of CO₂, making meat production a major contributor to carbon footprints.</p>
-
-    <h2>4. Waste Management</h2>
-    <p><strong>How it happens:</strong> When waste is not properly managed, it releases greenhouse gases.</p>
-    <p><strong>Examples:</strong></p>
-    <ul>
-        <li><strong>Landfills</strong> – Organic waste decomposes, releasing methane (CH₄).</li>
-        <li><strong>Incineration</strong> – Burning waste produces CO₂.</li>
-    </ul>
-    <p class="impact">🔹 Impact: Food waste alone is responsible for about 8% of global greenhouse gas emissions.</p>
-
-    <h2>5. Consumer Goods & Supply Chains</h2>
-    <p><strong>How it happens:</strong> The products we buy, use, and throw away have hidden carbon emissions from production and transportation.</p>
-    <p><strong>Examples:</strong></p>
-    <ul>
-        <li><strong>Manufacturing</strong> – Factories consume energy and release CO₂.</li>
-        <li><strong>Transportation</strong> – Goods are shipped worldwide using fossil-fuel-powered vehicles.</li>
-        <li><strong>Packaging waste</strong> – Plastic and paper production require energy and cause emissions.</li>
-    </ul>
-    <p class="impact">🔹 Impact: A single new smartphone has a carbon footprint of 80-90 kg of CO₂ from production to disposal.</p>
-    </div>
+      </div>
+      
+      <div class="content-card">
+        <h2 class="section-title">1. Burning Fossil Fuels (Main Source)</h2>
+        <p><strong>How it happens:</strong> When we burn coal, oil, or natural gas for energy, it releases CO₂ into the air. This happens in power plants, vehicles, and heating systems.</p>
+        <p><strong>Examples:</strong></p>
+        <ul>
+            <li><strong>Electricity production</strong> – Coal and gas power plants burn fossil fuels to generate electricity.</li>
+            <li><strong>Transportation</strong> – Cars, trucks, ships, and airplanes burn gasoline or diesel, releasing CO₂.</li>
+            <li><strong>Heating and cooking</strong> – Homes and industries use natural gas, which emits CO₂ when burned.</li>
+        </ul>
+        <p class="impact">🔹 Impact: The biggest contributor to carbon footprints. One liter of gasoline burned in a car emits about 2.3 kg of CO₂.</p>
+      </div>
+      
+      <div class="content-card">
+        <h2 class="section-title">2. Industrial Processes</h2>
+        <p><strong>How it happens:</strong> Factories emit CO₂ and other gases when making products like cement, steel, and chemicals.</p>
+        <p><strong>Examples:</strong></p>
+        <ul>
+            <li><strong>Cement production</strong> – Heating limestone releases large amounts of CO₂.</li>
+            <li><strong>Steel and aluminum manufacturing</strong> – Uses coal-fired furnaces, producing CO₂.</li>
+            <li><strong>Plastics and chemicals</strong> – Made from fossil fuels, releasing emissions.</li>
+        </ul>
+        <p class="impact">🔹 Impact: Industrial emissions account for 21% of global CO₂ emissions.</p>
+      </div>
+      
+      <div class="content-card">
+        <h2 class="section-title">3. Agriculture & Food Production</h2>
+        <p><strong>How it happens:</strong> Farming activities release methane (CH₄) from livestock and nitrous oxide (N₂O) from fertilizers.</p>
+        <p><strong>Examples:</strong></p>
+        <ul>
+            <li><strong>Livestock (cows, sheep, goats)</strong> – Digestive processes produce methane, a gas 25 times more powerful than CO₂.</li>
+            <li><strong>Fertilizers & pesticides</strong> – Used to grow crops, but release nitrous oxide, which is 300 times stronger than CO₂.</li>
+            <li><strong>Deforestation for farming</strong> – Cutting down trees reduces CO₂ absorption.</li>
+        </ul>
+        <p class="impact">🔹 Impact: Producing 1 kg of beef emits 27 kg of CO₂, making meat production a major contributor to carbon footprints.</p>
+      </div>
+      
+      <div class="content-card">
+        <h2 class="section-title">4. Waste Management</h2>
+        <p><strong>How it happens:</strong> When waste is not properly managed, it releases greenhouse gases.</p>
+        <p><strong>Examples:</strong></p>
+        <ul>
+            <li><strong>Landfills</strong> – Organic waste decomposes, releasing methane (CH₄).</li>
+            <li><strong>Incineration</strong> – Burning waste produces CO₂.</li>
+        </ul>
+        <p class="impact">🔹 Impact: Food waste alone is responsible for about 8% of global greenhouse gas emissions.</p>
+      </div>
+      
+      <div class="content-card">
+        <h2 class="section-title">5. Consumer Goods & Supply Chains</h2>
+        <p><strong>How it happens:</strong> The products we buy, use, and throw away have hidden carbon emissions from production and transportation.</p>
+        <p><strong>Examples:</strong></p>
+        <ul>
+            <li><strong>Manufacturing</strong> – Factories consume energy and release CO₂.</li>
+            <li><strong>Transportation</strong> – Goods are shipped worldwide using fossil-fuel-powered vehicles.</li>
+            <li><strong>Packaging waste</strong> – Plastic and paper production require energy and cause emissions.</li>
+        </ul>
+        <p class="impact">🔹 Impact: A single new smartphone has a carbon footprint of 80-90 kg of CO₂ from production to disposal.</p>
+      </div>
+    </main>
+  </div>
 </body>
 </html>

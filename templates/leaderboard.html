@@ -1,141 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard - Carbon Track</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            display: flex;
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background-color: #f0f2f5;
-        }
-        .header {
-            width: 100%;
-            background-color: #6ab3c9;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 36px;
-            font-weight: bold;
-            font-family: 'Montserrat', sans-serif;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
-        .sidebar {
-            width: 250px;
-            background-color: #6ab3c9;
-            height: 100vh;
-            padding-top: 80px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 999;
-        }
-        .sidebar a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 15px;
-            font-size: 18px;
-            border-bottom: 1px solid #4a90e2;
-            text-align: center;
-            transition: background-color 0.3s ease;
-        }
-        .sidebar a:hover {
-            background-color: #4a90e2;
-        }
-        .content {
-            margin-left: 250px;
-            padding: 100px 20px 20px;
-            width: calc(100% - 250px);
-            background-color: #f0f2f5;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .leaderboard-container {
-            max-width: 800px;
-            width: 100%;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .leaderboard-item:last-child {
-            border-bottom: none;
-        }
-        .rank {
-            font-weight: bold;
-            color: #6ab3c9;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .rank i {
-            font-size: 24px;
-        }
-        .rank-1 i {
-            color: gold;
-        }
-        .rank-2 i {
-            color: silver;
-        }
-        .rank-3 i {
-            color: #cd7f32; /* Bronze */
-        }
-        .name {
-            flex-grow: 1;
-            margin-left: 20px;
-        }
-        .coins {
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard - Carbon Track</title>
+  <style>
+    :root {
+      --primary-color: #2E7D32;
+      --secondary-color: #4CAF50;
+      --accent-color: #81C784;
+      --light-bg: #F1F8E9;
+      --dark-text: #263238;
+      --light-text: #FFFFFF;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: var(--dark-text);
+    }
+    
+    .container {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      background-color: var(--primary-color);
+      color: var(--light-text);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: auto;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--light-text);
+      transition: background-color 0.3s;
+    }
+    
+    .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Main Content */
+    .main-content {
+      padding: 20px 30px;
+      position: relative;
+    }
+    
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+    }
+    
+    .user-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .user-info p {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+    }
+    
+    .btn-secondary {
+      background-color: #e0e0e0;
+      color: var(--dark-text);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #d0d0d0;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    /* Leaderboard specific styles */
+    .leaderboard-container {
+      width: 100%;
+    }
+    
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .leaderboard-item:last-child {
+      border-bottom: none;
+    }
+    
+    .rank {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      width: 80px;
+    }
+    
+    .rank-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--dark-text);
+      font-weight: bold;
+    }
+    
+    .rank-1 .rank-badge {
+      background-color: gold;
+    }
+    
+    .rank-2 .rank-badge {
+      background-color: silver;
+    }
+    
+    .rank-3 .rank-badge {
+      background-color: #CD7F32; /* Bronze */
+    }
+    
+    .rank-other .rank-badge {
+      background-color: var(--light-bg);
+    }
+    
+    .name {
+      flex-grow: 1;
+      font-weight: 500;
+    }
+    
+    .coins {
+      font-weight: 600;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+  </style>
 </head>
 <body>
-    <div class="header">Leaderboard</div>
-    <div class="sidebar">
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('calculator') }}">Calculation</a>
-        <a href="{{ url_for('tasks') }}">Tasks</a>
-        <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
-        <a href="#">Chatbot (Coming Soon)</a>
-        <a href="{{ url_for('logout') }}">Log Out</a>
-    </div>
-    <div class="content">
-        <div class="leaderboard-container">
-            {% for user in leaderboard_data %}
-            <div class="leaderboard-item">
-                <div class="rank {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">
-                    #{{ loop.index }}
-                    {% if loop.index == 1 %}
-                        <i class="fas fa-trophy"></i> <!-- Gold trophy -->
-                    {% elif loop.index == 2 %}
-                        <i class="fas fa-trophy"></i> <!-- Silver trophy -->
-                    {% elif loop.index == 3 %}
-                        <i class="fas fa-trophy"></i> <!-- Bronze trophy -->
-                    {% endif %}
-                   
-                </div>
-                <div class="name">{{ user.name }}</div>
-                <div class="coins">{{ user.total_coins | round(2) }} Earth Coins</div>
-            </div>
-            {% endfor %}
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Carbon Track
+      </div>
+      
+      <div class="nav-links">
+        <a href="{{ url_for('dashboard') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+          Dashboard
+        </a>
+        <a href="{{ url_for('calculator') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 22h20"></path>
+            <path d="M5.6 18l8-14L21 10.6"></path>
+          </svg>
+          Calculation
+        </a>
+        <a href="{{ url_for('offsetting_sites') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V6l-8-4-8 4v6c0 6 8 10 8 10"></path>
+            <path d="M15 9l-6 6"></path>
+            <path d="M9 9l6 6"></path>
+          </svg>
+          Offsetting Sites
+        </a>
+        <a href="{{ url_for('tasks') }}" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v8"></path>
+            <path d="m4.93 10.93 1.41 1.41"></path>
+            <path d="M2 18h2"></path>
+            <path d="M20 18h2"></path>
+            <path d="m19.07 10.93-1.41 1.41"></path>
+            <path d="M22 22H2"></path>
+            <path d="M16 6 8 14l-4 4"></path>
+            <path d="m8 6 8 8"></path>
+          </svg>
+          Tasks
+        </a>
+        <a href="{{ url_for('leaderboard') }}" class="nav-link active">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          Leaderboard
+        </a>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="top-bar">
+        <div class="user-profile">
+          <div class="avatar">{{ session['user'][0:2] }}</div>
+          <div class="user-info">
+            <h3>{{ session['user'] }}</h3>
+            <p>Carbon Tracker</p>
+          </div>
         </div>
-    </div>
+      </div>
+      
+      <!-- Leaderboard Card -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Carbon Footprint Leaderboard</h2>
+        </div>
+        
+        <div class="leaderboard-container">
+          {% for user in leaderboard_data %}
+          <div class="leaderboard-item">
+            <div class="rank {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% else %}rank-other{% endif %}">
+              <div class="rank-badge">
+                {% if loop.index <= 3 %}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                    <path d="M4 22h16"></path>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+                  </svg>
+                {% else %}
+                  {{ loop.index }}
+                {% endif %}
+              </div>
+              {% if loop.index <= 3 %}#{{ loop.index }}{% endif %}
+            </div>
+            <div class="name">{{ user.username }}</div>
+            <div class="coins">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+              </svg>
+              {{ user.total_coins | round(2) }} Earth Coins
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </main>
 </body>
 </html>
