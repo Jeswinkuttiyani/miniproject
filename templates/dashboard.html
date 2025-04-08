@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>What is Carbon Footprint?</title>
+  <title>Carbon Track Dashboard</title>
   <style>
     :root {
       --primary-color: #2E7D32;
@@ -32,7 +32,6 @@
       grid-template-columns: 250px 1fr;
       min-height: 100vh;
     }
-    
     /* Sidebar */
     .sidebar {
       background-color: var(--primary-color);
@@ -77,9 +76,30 @@
       background-color: rgba(255, 255, 255, 0.1);
     }
     
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      background-color: var(--accent-color);
+      color: var(--dark-text);
+      margin-top: 20px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s;
+      width: 100%;
+    }
+    
+    .action-btn:hover {
+      background-color: #5CD65C;
+    }
+    
     /* Main Content */
     .main-content {
-      padding: 30px 40px;
+      padding: 20px 30px;
+      position: relative;
     }
     
     .top-bar {
@@ -89,39 +109,288 @@
       margin-bottom: 30px;
     }
     
-    .page-title {
-      font-size: 28px;
-      font-weight: 600;
-      color: var(--primary-color);
-      margin-bottom: 25px;
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 15px;
     }
     
-    .content-card {
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+    }
+    
+    .user-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .user-info p {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+    }
+    
+    .btn-secondary {
+      background-color: #e0e0e0;
+      color: var(--dark-text);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #d0d0d0;
+
+    }
+    
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 24px;
+    }
+    
+    .card {
       background-color: white;
       border-radius: 12px;
       box-shadow: var(--shadow);
-      padding: 25px;
-      margin-bottom: 25px;
+      padding: 20px;
     }
     
-    .section-title {
-      font-size: 24px;
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .card-title {
+      font-size: 18px;
       font-weight: 600;
+    }
+    
+    .card-value {
+      font-size: 32px;
+      font-weight: 700;
       color: var(--primary-color);
-      margin-bottom: 15px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
     }
     
-    .sub-section-title {
-      font-size: 20px;
-      font-weight: 500;
-      color: var(--secondary-color);
-      margin: 20px 0 10px 0;
-    }
-    
-    p {
+    .card-value span {
       font-size: 16px;
-      line-height: 1.6;
+      color: #666;
+    }
+    
+    .trend {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .trend.positive {
+      color: #4CAF50;
+    }
+    
+    .trend.negative {
+      color: #F44336;
+    }
+    
+    .chart-container {
+      width: 100%;
+      height: 250px;
+      position: relative;
+    }
+    
+    .breakdown {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 15px;
+      background-color: var(--light-bg);
+      border-radius: 8px;
+    }
+    
+    .breakdown-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .no-data-message {
+      text-align: center;
+      color: #757575;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    /* AI Assistant Button */
+    .ai-assistant-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      border: none;
+      transition: background-color 0.3s;
+    }
+
+    .ai-assistant-btn:hover {
+      background-color: var(--secondary-color);
+    }
+    
+    /* Get Suggestions Button */
+    .suggestions-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      background-color: var(--accent-color);
+      color: var(--dark-text);
+      margin-top: 20px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s;
+      width: 100%;
+      text-decoration: none;
+    }
+
+    .suggestions-btn:hover {
+      background-color: var(--secondary-color);
+      color: var(--light-text);
+    }
+
+    /* Popup Container */
+    .popup-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      position: relative;
+      width: 400px;
+    }
+
+    .popup-content h2 {
       margin-bottom: 15px;
+    }
+
+    .popup-content p {
+      margin-bottom: 20px;
+    }
+
+    .popup-content input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .popup-content form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .popup-content label {
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--dark-text);
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
     }
     
     @media (max-width: 768px) {
@@ -132,100 +401,616 @@
       .sidebar {
         display: none;
       }
-      
-      .main-content {
-        padding: 20px;
-      }
     }
+
+    /* Add these new styles for the chatbot */
+    #chatbot-container {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 350px;
+      height: 450px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1000;
+      display: none;
+    }
+
+    #chatbot-container.visible {
+      display: flex;
+    }
+
+    #chatbot-header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #chatbot-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    #chatbot-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      padding: 10px 15px;
+      border-radius: 18px;
+      max-width: 80%;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+
+    .user {
+      background-color: var(--accent-color);
+      color: var(--dark-text);
+      align-self: flex-end;
+      border-bottom-right-radius: 5px;
+    }
+
+    .bot {
+      background-color: #f0f0f0;
+      color: var(--dark-text);
+      align-self: flex-start;
+      border-bottom-left-radius: 5px;
+    }
+
+    #chatbot-input-container {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #eee;
+    }
+
+    #chatbot-input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      outline: none;
+    }
+
+    #chatbot-send {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-left: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* All your existing styles remain... */
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Sidebar -->
+        <!-- Sidebar -->
     <aside class="sidebar">
-      <div class="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-          <polyline points="9 22 9 12 15 12 15 22"></polyline>
-        </svg>
-        Carbon Track
-      </div>
-      
-      <div class="nav-links">
-        <a href="{{ url_for('home') }}" class="nav-link">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
-          Home
-        </a>
-        <a href="{{ url_for('df1') }}" class="nav-link active">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
-          What is Carbon Footprint?
-        </a>
-        <a href="{{ url_for('df2') }}" class="nav-link">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-            <line x1="6" y1="1" x2="6" y2="4"></line>
-            <line x1="10" y1="1" x2="10" y2="4"></line>
-            <line x1="14" y1="1" x2="14" y2="4"></line>
-          </svg>
-          How is it Produced?
-        </a>
-        <a href="{{ url_for('df3') }}" class="nav-link">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14"></path>
-            <path d="M12 5v14"></path>
-          </svg>
-          How to Reduce?
-        </a>
-        <a href="{{ url_for('df4') }}" class="nav-link">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="6" width="20" height="12" rx="2"></rect>
-            <circle cx="12" cy="12" r="2"></circle>
-            <path d="M6 12h.01M18 12h.01"></path>
-          </svg>
-          What is Carbon Credit?
-        </a>
-      </div>
-    </aside>
-    
-    <!-- Main Content -->
+          Carbon Track
+        </div>
+        
+        <div class="nav-links">
+          <a href="{{ url_for('dashboard') }}" class="nav-link active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="9" y1="21" x2="9" y2="9"></line>
+            </svg>
+            Dashboard
+          </a>
+          <a href="{{ url_for('calculator') }}" class="nav-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 22h20"></path>
+              <path d="M5.6 18l8-14L21 10.6"></path>
+            </svg>
+            Calculation
+          </a>
+          <a href="{{ url_for('offsetting_sites') }}" class="nav-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V6l-8-4-8 4v6c0 6 8 10 8 10"></path>
+              <path d="M15 9l-6 6"></path>
+              <path d="M9 9l6 6"></path>
+            </svg>
+            Offsetting Sites
+          </a>
+          <a href="{{ url_for('tasks') }}" class="nav-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v8"></path>
+              <path d="m4.93 10.93 1.41 1.41"></path>
+              <path d="M2 18h2"></path>
+              <path d="M20 18h2"></path>
+              <path d="m19.07 10.93-1.41 1.41"></path>
+              <path d="M22 22H2"></path>
+              <path d="M16 6 8 14l-4 4"></path>
+              <path d="m8 6 8 8"></path>
+            </svg>
+            Tasks
+          </a>
+          <a href="{{ url_for('leaderboard') }}" class="nav-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            Leaderboard
+          </a>
+        </div>
+      </aside>
+
+
     <main class="main-content">
-      <h1 class="page-title">What is Carbon Footprint?</h1>
-      
-      <div class="content-card">
-        <p>A carbon footprint is the total amount of greenhouse gases, primarily carbon dioxide (CO₂), emitted directly or indirectly by an 
-        individual, organization, event, or product. It is measured in terms of CO₂-equivalent emissions and results from activities like 
-        transportation, energy consumption, manufacturing, and food production. The larger the carbon footprint, the greater the contribution 
-        to global warming and climate change. Reducing carbon footprints can be achieved through energy efficiency, using renewable energy, 
-        minimizing waste, and adopting sustainable lifestyle choices such as using public transport, consuming less meat, and supporting eco
-        -friendly products.</p>
-      </div>
-      
-      <div class="content-card">
-        <h2 class="section-title">What types of carbon footprints are there?</h2>
-        <p>Depending on the activity we're analyzing, distinct types of carbon footprint can be identified, considering the activity's typical 
-        GHG emissions per year.</p>
+            <div class="top-bar">
+            <div class="user-profile">
+              <div class="avatar">{{ session['user'][0:2] }}</div>
+              <div class="user-info">
+                <h3>{{ session['user'] }}</h3>
+                <p>Carbon Tracker</p>
+              </div>
+            </div>
+            
+            <div class="buttons">
+              <button class="btn btn-primary" onclick="openPopup('change-password-popup')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Change Password
+              </button>
+              <button class="btn btn-secondary" onclick="openPopup('logout-popup')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Log Out
+              </button>
+            </div>
+          </div>
+          
+      <div class="dashboard-grid">
+        <!-- Today's Carbon Footprint Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Today's Carbon Footprint</h2>
+          </div>
+          
+          <div class="card-value">
+            {{ result.total | round(2) }} <span>kg CO₂e</span>
+          </div>
+          
+          {% if result.total == 0 %}
+          <div class="no-data-message">
+            No carbon footprint data for today. Complete the calculator to see your impact.
+          </div>
+          {% else %}
+          <div class="breakdown">
+            <div class="breakdown-item">
+              <div class="breakdown-label">
+                <div class="dot" style="background-color: #4CAF50;"></div>
+                Transport
+              </div>
+              <div>{{ result.breakdown.transport | round(2) }} kg</div>
+            </div>
+            <div class="breakdown-item">
+              <div class="breakdown-label">
+                <div class="dot" style="background-color: #2196F3;"></div>
+                Energy
+              </div>
+              <div>{{ result.breakdown.energy | round(2) }} kg</div>
+            </div>
+            <div class="breakdown-item">
+              <div class="breakdown-label">
+                <div class="dot" style="background-color: #FFC107;"></div>
+                Food
+              </div>
+              <div>{{ result.breakdown.food | round(2) }} kg</div>
+            </div>
+            <div class="breakdown-item">
+              <div class="breakdown-label">
+                <div class="dot" style="background-color: #9C27B0;"></div>
+                Water & Waste
+              </div>
+              <div>{{ (result.breakdown.water + result.breakdown.waste) | round(2) }} kg</div>
+            </div>
+          </div>
+          
+          <!-- New Suggestions Button -->
+          <a href="{{ url_for('suggestions') }}" class="suggestions-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            Get AI Suggestions
+          </a>
+          {% endif %}
+        </div>
         
-        <h3 class="sub-section-title">Individual carbon footprint</h3>
-        <p>It's based on the consumption habits of the person and takes into account GHG emissions associated with their means of transportation, 
-        electricity use for heating and cooling at home, eating habits, consumption of goods, recycling habits, etc.</p>
-        
-        <h3 class="sub-section-title">Product footprint</h3>
-        <p>This includes the GHG emissions from the stages of raw material extraction, production process, required energy generation, product 
-        transformation for other companies, the customer's usage, and its treatment as waste as well as the transportation between stages.</p>
-        
-        <h3 class="sub-section-title">Corporate footprint</h3>
-        <p>It includes the GHG emissions inventory related to a company or organization's operations. It's the main basis for identifying energy 
-        efficiency measures within the organization as well as joint action measures with other companies in the sector.</p>
-      </div>
+        <!-- Carbon Footprint Breakdown - Bar Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Today's Footprint Breakdown</h2>
+          </div>
+          
+          <div class="chart-container">
+            {% if result.total == 0 %}
+            <div class="no-data-message" style="padding-top: 100px;">
+              No data available for today. Complete the calculator to see your breakdown.
+            </div>
+            {% else %}
+            <canvas id="footprintBreakdownChart"></canvas>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Weekly Comparison Graph - Line Chart -->
+        <div class="card" style="grid-column: 1 / span 2;">
+            <div class="card-header">
+              <h2 class="card-title">Last 7 Days Comparison</h2>
+            </div>
+            
+            <div class="chart-container">
+              <canvas id="weeklyTrendChart"></canvas>
+            </div>
+            
+            <div class="legend">
+              <div class="legend-item">
+                <div class="dot" style="background-color: #4CAF50;"></div>
+                Total Daily Carbon Footprint (kg CO₂e)
+              </div>
+            </div>
+          </div>
+        </div>
     </main>
+  
+    <!-- Replace the AI Assistant Button with this updated one -->
+    <button class="ai-assistant-btn" id="chatbot-toggle">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"></path>
+        <path d="M15.873 15.874A9.967 9.967 0 0 0 18 10c0-5.523-4.477-10-10-10S0 4.477 0 10s4.477 10 10 10a9.967 9.967 0 0 0 5.874-2.127"></path>
+      </svg>
+    </button>
+  
+    <!-- Add the chatbot container structure -->
+    <div id="chatbot-container">
+      <div id="chatbot-header">
+        <h3>Carbon Track Assistant</h3>
+        <button id="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages">
+        <!-- Messages will be added here dynamically -->
+        <div class="message bot">
+          Hello! I'm your Carbon Track Assistant. How can I help you reduce your carbon footprint today?
+        </div>
+      </div>
+      <div id="chatbot-input-container">
+        <input type="text" id="chatbot-input" placeholder="Type your message here...">
+        <button id="chatbot-send">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+
+     <!-- Popup Containers -->
+      <!-- Change Password Popup -->
+    <div id="change-password-popup" class="popup-container" onclick="closePopup(event)">
+      <div class="popup-content">
+        <span class="close-btn" onclick="closePopup(event)">&times;</span>
+        <h2>Change Password</h2>
+        <form id="change-password-form" onsubmit="submitChangePassword(event)">
+          <label for="current-password">Current Password</label>
+          <input type="password" id="current-password" name="current_password" required>
+          
+          <label for="new-password">New Password</label>
+          <input type="password" id="new-password" name="new_password" required>
+          
+          <label for="confirm-password">Confirm New Password</label>
+          <input type="password" id="confirm-password" name="confirm_password" required>
+    
+          <div id="error-message" style="color: red; margin-bottom: 10px;"></div>
+          <div id="success-message" style="color: green; margin-bottom: 10px;"></div>
+    
+          <button type="submit" class="btn btn-primary">Change Password</button>
+        </form>
+      </div>
+    </div>
+  
+    <div id="logout-popup" class="popup-container" onclick="closePopup(event)">
+      <div class="popup-content">
+        <span class="close-btn" onclick="closePopup(event)">&times;</span>
+        <h2>Log Out</h2>
+        <p>Are you sure you want to log out?</p>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button class="btn btn-secondary" onclick="closePopup(event)">Cancel</button>
+          <button class="btn btn-primary" onclick="window.location.href='{{ url_for('logout') }}'">Log Out</button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- Keep your existing Chart.js script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Add your original popup handling script -->
+  <script>
+    function openPopup(popupId) {
+      document.getElementById(popupId).style.display = 'flex';
+    }
+
+    function closePopup(event) {
+      if (event.target.classList.contains('popup-container') || event.target.classList.contains('close-btn') || event.target.classList.contains('btn-secondary')) {
+        event.stopPropagation();
+        let popupContainer = null;
+        if (event.target.classList.contains('popup-container')) {
+          popupContainer = event.target;
+        } else {
+          popupContainer = event.target.closest('.popup-container');
+        }
+        if (popupContainer) {
+          popupContainer.style.display = 'none';
+        }
+      }
+    }
+    
+    async function submitChangePassword(event) {
+      // Keep your password change function
+      event.preventDefault();
+
+    const form = document.getElementById("change-password-form");
+    const formData = new FormData(form);
+    
+    const currentPassword = formData.get("current_password");
+    const newPassword = formData.get("new_password");
+    const confirmPassword = formData.get("confirm_password");
+
+    const errorMsg = document.getElementById("error-message");
+    const successMsg = document.getElementById("success-message");
+
+    // Clear previous messages
+    errorMsg.textContent = "";
+    successMsg.textContent = "";
+
+    if (newPassword !== confirmPassword) {
+      errorMsg.textContent = "New password and confirmation do not match.";
+      return;
+    }
+
+    // Send data to backend
+    const response = await fetch('/change-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      successMsg.textContent = "Password changed successfully!";
+      form.reset();
+    } else {
+      errorMsg.textContent = result.message;
+    }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Keep your chart initialization code
+       // Only initialize breakdown chart if we have data
+       {% if result.total > 0 %}
+      // Bar Chart for Footprint Breakdown
+      const breakdownCtx = document.getElementById('footprintBreakdownChart').getContext('2d');
+      const breakdownChart = new Chart(breakdownCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Transport', 'Energy', 'Food', 'Water', 'Waste'],
+          datasets: [{
+            label: 'Carbon Footprint (kg CO₂e)',
+            data: [
+              {{ result.breakdown.transport | round(2) }}, 
+              {{ result.breakdown.energy | round(2) }}, 
+              {{ result.breakdown.food | round(2) }}, 
+              {{ result.breakdown.water | round(2) }},
+              {{ result.breakdown.waste | round(2) }}
+            ],
+            backgroundColor: [
+              '#4CAF50',
+              '#2196F3',
+              '#FFC107',
+              '#9C27B0',
+              '#F44336'
+            ],
+            borderWidth: 0,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'kg CO₂e'
+              }
+            }
+          }
+        }
+      });
+      {% endif %}
+      
+      // Line Chart for Weekly Trend
+      const weeklyCtx = document.getElementById('weeklyTrendChart').getContext('2d');
+      const weeklyChart = new Chart(weeklyCtx, {
+        type: 'line',
+        data: {
+          labels: {{ dates | tojson }},
+          datasets: [{
+            label: 'Daily Carbon Footprint',
+            data: {{ totals | tojson }},
+            borderColor: '#2E7D32',
+            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'kg CO₂e'
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+
+  <!-- Add the modified chatbot.js script directly here -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbotContainer = document.getElementById('chatbot-container');
+        const chatbotClose = document.getElementById('chatbot-close');
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotSend = document.getElementById('chatbot-send');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+
+        chatbotToggle.addEventListener('click', function() {
+            chatbotContainer.classList.toggle('visible');
+        });
+
+        chatbotClose.addEventListener('click', function() {
+            chatbotContainer.classList.remove('visible');
+        });
+
+        chatbotSend.addEventListener('click', function() {
+            sendMessage();
+        });
+
+        chatbotInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            const userMessage = chatbotInput.value.trim();
+            if (userMessage) {
+                appendMessage(userMessage, 'user');
+                chatbotInput.value = '';
+                getBotResponse(userMessage);
+            }
+        }
+
+        function appendMessage(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatbotMessages.appendChild(messageElement);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+
+        async function getBotResponse(userMessage) {
+            const apiKey = 'AIzaSyANngrLpAav9F0mXtqDDY95p2foV88aCGE';
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            // Add a loading message
+            const loadingElement = document.createElement('div');
+            loadingElement.classList.add('message', 'bot');
+            loadingElement.textContent = 'Thinking...';
+            chatbotMessages.appendChild(loadingElement);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+            try {
+                // Enhance the prompt to be more specific to carbon footprint assistance
+                const enhancedUserMessage = `As a carbon footprint assistant for the Carbon Track app, please respond to this user query: ${userMessage}. Focus on providing practical advice for reducing carbon emissions.`;
+                
+                const requestBody = {
+                    contents: [{
+                        parts: [{
+                            text: enhancedUserMessage
+                        }]
+                    }]
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                
+                // Remove the loading message
+                chatbotMessages.removeChild(loadingElement);
+                
+                // Check if we have a valid response
+                if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts) {
+                    const botMessage = data.candidates[0].content.parts[0].text;
+                    appendMessage(botMessage, 'bot');
+                } else {
+                    appendMessage("I'm sorry, I couldn't process your request. Please try again.", 'bot');
+                }
+            } catch (error) {
+                console.error('Error fetching bot response:', error);
+                
+                // Remove the loading message
+                chatbotMessages.removeChild(loadingElement);
+                
+                appendMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            }
+        }
+    });
+  </script>
 </body>
 </html>
