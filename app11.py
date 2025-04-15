@@ -4,8 +4,10 @@ from pymongo.server_api import ServerApi
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from random import randint
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta 
 import re
+import numpy as np
+from collections import defaultdict
 
 # --- Flask App Initialization ---
 app = Flask(__name__)
@@ -192,6 +194,95 @@ def login():
             return render_template('login.html', error="Invalid Login, try again.")
     return render_template('login.html', error=None)
 
+
+# --- Forgot Password Routes ---
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        
+        # Check if email exists in the database
+        user = users_collection.find_one({"email": email})
+        if not user:
+            return render_template('forgot_password.html', error="Email not found in our records.")
+        
+        # Send OTP for password reset
+        send_otp(email)
+        
+        # Store email in session for password reset process
+        session['reset_email'] = email
+        
+        flash("OTP sent to your email. Please verify to reset your password.")
+        return redirect(url_for('verify_reset_otp'))
+    
+    return render_template('forgot_password.html')
+
+@app.route('/verify-reset-otp', methods=['GET', 'POST'])
+def verify_reset_otp():
+    if request.method == 'POST':
+        entered_otp = request.form['otp']
+        stored_otp = session.get('otp')
+        otp_expiry_str = session.get('otp_expiry')
+        reset_email = session.get('reset_email')
+        
+        if not stored_otp or not otp_expiry_str or not reset_email:
+            flash("OTP expired or invalid. Please try again.")
+            return redirect(url_for('forgot_password'))
+        
+        # Convert expiry string back to datetime object
+        otp_expiry = datetime.fromisoformat(otp_expiry_str)
+        
+        if datetime.now() > otp_expiry:
+            flash("OTP expired. Please try again.")
+            return redirect(url_for('forgot_password'))
+        
+        if entered_otp == stored_otp:
+            # Valid OTP - proceed to password reset
+            return redirect(url_for('reset_password'))
+        
+        flash("Invalid OTP. Please try again.")
+    
+    return render_template('verify_reset_otp.html')
+
+@app.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    reset_email = session.get('reset_email')
+    
+    if not reset_email:
+        flash("Password reset session expired. Please try again.")
+        return redirect(url_for('forgot_password'))
+    
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+        
+        # Validate new password
+        if not is_valid_password(new_password):
+            return render_template('reset_password.html', 
+                                  error="Password must be at least 6 characters long.")
+        
+        # Check if passwords match
+        if new_password != confirm_password:
+            return render_template('reset_password.html', 
+                                  error="Passwords don't match. Please try again.")
+        
+        # Update password in database
+        hashed_password = generate_password_hash(new_password)
+        users_collection.update_one(
+            {"email": reset_email},
+            {"$set": {"password": hashed_password}}
+        )
+        
+        # Clear reset session data
+        session.pop('reset_email', None)
+        session.pop('otp', None)
+        session.pop('otp_expiry', None)
+        
+        flash("Password reset successfully! Please login with your new password.")
+        return redirect(url_for('login'))
+    
+    return render_template('reset_password.html')
+
 # --- Logout Route ---
 @app.route('/logout')
 def logout():
@@ -205,17 +296,25 @@ def dashboard():
         return redirect(url_for("login"))
 
     user = session["user"]
+       
+    # Get today's date (without time)
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    tomorrow = today + timedelta(days=1)
+    
+     # Fetch today's footprint record from MongoDB (if exists)
+    today_footprint = footprints_collection.find_one({
+        "user": user,
+        "date": {"$gte": today, "$lt": tomorrow}
+    }, sort=[("date", -1)])  # Sort by date descending to get the latest entry for today
 
-    # Fetch the most recent footprint record from MongoDB
-    last_footprint = footprints_collection.find_one({"user": user}, sort=[("date", -1)])
-
-    if last_footprint:
+    if today_footprint:
+        # Use today's footprint data if available
         result = {
-            "total": last_footprint["total_footprint"],
-            "breakdown": last_footprint["breakdown"]
+            "total": today_footprint["total_footprint"],
+            "breakdown": today_footprint["breakdown"]
         }
     else:
-        # Default values for first-time login users
+        # Show zero values if no entry for today
         result = {
             "total": 0,
             "breakdown": {
@@ -401,7 +500,7 @@ def calculate_footprint(data):
         "vegetarian_diet": 1.5,
         "vegan_diet": 0.8,
         "waste": 0.5,
-        "water": 0.3
+        "water": 0.006
     }
     
     # Car type multipliers
@@ -484,6 +583,386 @@ def calculate_footprint(data):
             "water": water_footprint
         }
     }
+
+# Add this new route to your Flask app
+@app.route('/suggestions', methods=['GET'])
+def suggestions():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    
+    user = session["user"]
+    
+    
+    # Fetch the user's latest footprint data
+    latest_footprint = footprints_collection.find_one(
+        {"user": user}, 
+        sort=[("date", -1)]
+    )
+    
+    if not latest_footprint:
+        # If no footprint data exists, redirect to calculator
+        flash("Please calculate your carbon footprint first to get personalized suggestions.")
+        return redirect(url_for("calculator"))
+    
+    # Generate suggestions based on footprint data
+    suggestions = generate_suggestions(latest_footprint)
+    
+    # Get user's footprint breakdown for display
+    footprint_breakdown = latest_footprint.get("breakdown", {})
+    total_footprint = latest_footprint.get("total_footprint", 0)
+    
+    return render_template(
+        "suggestions.html", 
+        suggestions=suggestions, 
+        footprint_breakdown=footprint_breakdown,
+        total_footprint=total_footprint
+    )
+def generate_suggestions(footprint_data):
+    """Generate highly personalized suggestions based on user's carbon footprint data."""
+    suggestions = {
+        "transport": [],
+        "energy": [],
+        "food": [],
+        "waste": [],
+        "water": [],
+        "general": []
+    }
+    
+    breakdown = footprint_data.get("breakdown", {})
+    raw_data = footprint_data.get("raw_data", {})
+    total_footprint = footprint_data.get("total_footprint", 0)
+    
+    # Transport suggestions - more detailed and contextual
+    transport_footprint = breakdown.get("transport", 0)
+    transport_data = raw_data.get("transport", [])
+    
+    # Analyze transport patterns
+    car_usage = False
+    flight_usage = False
+    car_type = None
+    fuel_type = None
+    total_car_distance = 0
+    total_flight_distance = 0
+    
+    for transport_item in transport_data:
+        mode = transport_item.get("mode")
+        distance = transport_item.get("distance", 0)
+        
+        if mode == "car":
+            car_usage = True
+            total_car_distance += distance
+            car_type = transport_item.get("car_type")
+            fuel_type = transport_item.get("fuel_type")
+        elif mode == "flight":
+            flight_usage = True
+            total_flight_distance += distance
+    
+    # Car-specific suggestions
+    if car_usage:
+        # High car usage suggestions
+        if total_car_distance > 100:
+            suggestions["transport"].append({
+                "title": "Reduce car travel by carpooling",
+                "description": f"You drive approximately {total_car_distance} km. Carpooling for just 2 days a week could reduce your emissions by up to 40%.",
+                "impact": "high"
+            })
+        
+        # Car type & fuel suggestions
+        if fuel_type in ["petrol", "diesel"]:
+            suggestions["transport"].append({
+                "title": "Consider switching to an electric or hybrid vehicle",
+                "description": f"Your {fuel_type}-powered {car_type} vehicle produces significant emissions. An electric vehicle could reduce your transport emissions by up to 70%.",
+                "impact": "high"
+            })
+        elif fuel_type == "hybrid":
+            suggestions["transport"].append({
+                "title": "Maximize electric mode usage in your hybrid",
+                "description": "Ensure you're charging your hybrid regularly and using electric-only mode for shorter trips to minimize fuel consumption.",
+                "impact": "medium"
+            })
+        
+        if car_type in ["suv", "luxury"]:
+            suggestions["transport"].append({
+                "title": "Consider downsizing your vehicle",
+                "description": f"Your {car_type} vehicle consumes more fuel than necessary. A compact or mid-size car could reduce your emissions by 30-50% while meeting your needs.",
+                "impact": "high"
+            })
+        
+        # Short trip suggestions
+        if total_car_distance < 30:
+            suggestions["transport"].append({
+                "title": "Replace short car trips with active transport",
+                "description": "Your car journeys appear to be relatively short. Consider cycling or walking for trips under 5km, which can eliminate those emissions completely.",
+                "impact": "medium"
+            })
+    
+    # Flight suggestions
+    if flight_usage:
+        suggestions["transport"].append({
+            "title": "Reduce air travel impact",
+            "description": f"You've traveled {total_flight_distance} km by air. Consider carbon offsetting programs or choosing direct flights which have lower emissions than flights with connections.",
+            "impact": "high"
+        })
+        
+        if total_flight_distance > 5000:
+            suggestions["transport"].append({
+                "title": "Consider train travel for shorter journeys",
+                "description": "For continental travel under 1000km, trains produce about 75% less carbon than flights and offer comparable journey times when including airport procedures.",
+                "impact": "high"
+            })
+    
+    # Public transport encouragement
+    if transport_footprint > 5 and not any(item.get("mode") == "public_transport" for item in transport_data):
+        suggestions["transport"].append({
+            "title": "Integrate public transportation into your routine",
+            "description": "Using public transit for your commute just 2-3 days per week could reduce your transport emissions by 20-30%.",
+            "impact": "high"
+        })
+    
+    # Energy suggestions - more detailed based on actual usage
+    energy_footprint = breakdown.get("energy", 0)
+    energy_data = raw_data.get("energy", [])
+    
+    # Analyze energy usage patterns
+    total_electricity = 0
+    using_renewable = False
+    cooking_methods = set()
+    
+    for energy_item in energy_data:
+        electricity_source = energy_item.get("electricity_source")
+        electricity_usage = energy_item.get("electricity", 0)
+        cooking_fuel = energy_item.get("cooking_fuel")
+        
+        total_electricity += electricity_usage
+        if electricity_source in ["renewable_electricity", "mixed_electricity"]:
+            using_renewable = True
+        if cooking_fuel:
+            cooking_methods.add(cooking_fuel)
+    
+    # Electricity suggestions
+    if total_electricity > 0:
+        if not using_renewable:
+            suggestions["energy"].append({
+                "title": "Switch to a renewable energy provider",
+                "description": f"Your {total_electricity} kWh from non-renewable sources produces significant emissions. Switching to a green energy provider can reduce this by up to 90%.",
+                "impact": "high"
+            })
+            
+            suggestions["energy"].append({
+                "title": "Install home solar panels",
+                "description": "Based on your electricity usage, installing solar panels could pay for themselves within 5-8 years while significantly reducing your carbon footprint.",
+                "impact": "high"
+            })
+        
+        if total_electricity > 300:
+            suggestions["energy"].append({
+                "title": "Conduct a home energy audit",
+                "description": "Your electricity usage is above average. An energy audit can identify specific areas to improve efficiency, potentially reducing usage by 20-30%.",
+                "impact": "medium"
+            })
+            
+            suggestions["energy"].append({
+                "title": "Upgrade to energy-efficient appliances",
+                "description": "Replace older appliances with Energy Star rated ones, which can reduce electricity consumption by 10-50% depending on the appliance.",
+                "impact": "medium"
+            })
+    
+    # Cooking suggestions
+    if "lpg" in cooking_methods or "natural_gas" in cooking_methods:
+        suggestions["energy"].append({
+            "title": "Transition to induction cooking",
+            "description": "Gas cooking contributes to your footprint. Induction cooking is 85-90% energy efficient compared to 40% for gas and produces no indoor air pollution.",
+            "impact": "medium"
+        })
+    
+    if "wood" in cooking_methods:
+        suggestions["energy"].append({
+            "title": "Replace wood cooking with cleaner alternatives",
+            "description": "Wood burning for cooking produces significant emissions and particulate matter. Electric or induction cooking powered by renewable energy is much cleaner.",
+            "impact": "high"
+        })
+    
+    # Food suggestions - more nuanced based on diet
+    food_footprint = breakdown.get("food", 0)
+    diet_type = raw_data.get("food", {}).get("diet")
+    food_amount = raw_data.get("food", {}).get("amount", 0)
+    
+    # Diet-specific suggestions
+    if diet_type == "meat_diet":
+        suggestions["food"].append({
+            "title": "Adopt a 'flexitarian' approach",
+            "description": "By reducing red meat consumption to 1-2 times per week and replacing with plant proteins or poultry, you could reduce your food footprint by 20-30%.",
+            "impact": "high"
+        })
+        
+        suggestions["food"].append({
+            "title": "Try 'Meatless Mondays'",
+            "description": "Starting with just one meat-free day per week can reduce your annual food carbon footprint by up to 15%.",
+            "impact": "medium"
+        })
+    
+    elif diet_type == "vegetarian_diet":
+        suggestions["food"].append({
+            "title": "Reduce dairy consumption",
+            "description": "Dairy products have a high carbon footprint. Try plant-based milk alternatives and limit cheese consumption to further reduce your impact.",
+            "impact": "medium"
+        })
+    
+    # Food waste suggestions
+    if food_amount > 2:
+        suggestions["food"].append({
+            "title": "Plan meals to reduce food waste",
+            "description": "The average household wastes 30% of food purchased. Planning meals, proper storage, and using leftovers can significantly reduce your food carbon footprint.",
+            "impact": "medium"
+        })
+    
+    # Local food suggestions
+    suggestions["food"].append({
+        "title": "Shop at farmers markets and buy seasonal produce",
+        "description": "Local, seasonal food can reduce the carbon footprint of your diet by up to 10% by minimizing transportation and storage emissions.",
+        "impact": "medium"
+    })
+    
+    # Waste suggestions - more actionable
+    waste_footprint = breakdown.get("waste", 0)
+    waste_amount = raw_data.get("waste", {}).get("amount", 0)
+    
+    if waste_amount > 0:
+        # Tailored waste reduction suggestions
+        if waste_amount > 1.5:
+            suggestions["waste"].append({
+                "title": "Implement a comprehensive recycling system",
+                "description": f"Your waste output of {waste_amount} kg is above average. Setting up dedicated bins for different recyclables can reduce landfill waste by up to 70%.",
+                "impact": "high"
+            })
+            
+            suggestions["waste"].append({
+                "title": "Start composting food scraps",
+                "description": "Food waste in landfills produces methane. Composting can reduce your waste footprint while creating nutrient-rich soil for plants.",
+                "impact": "high"
+            })
+        
+        suggestions["waste"].append({
+            "title": "Adopt zero-waste shopping practices",
+            "description": "Using reusable bags, buying in bulk with your own containers, and choosing products with minimal packaging can reduce waste by up to 80%.",
+            "impact": "medium"
+        })
+        
+        suggestions["waste"].append({
+            "title": "Focus on reducing single-use plastics",
+            "description": "Replace disposable items with reusable alternatives: water bottles, coffee cups, straws, and food containers.",
+            "impact": "medium"
+        })
+    
+    # Water suggestions - more specific
+    water_footprint = breakdown.get("water", 0)
+    water_usage = raw_data.get("water", {}).get("usage", 0)
+    
+    if water_usage > 0:
+        if water_usage > 150:
+            suggestions["water"].append({
+                "title": "Install water-efficient fixtures",
+                "description": f"Your water usage of {water_usage} liters is high. Low-flow showerheads, faucet aerators, and dual-flush toilets can reduce water use by 40-50%.",
+                "impact": "high"
+            })
+            
+            suggestions["water"].append({
+                "title": "Fix leaks and drips immediately",
+                "description": "A single dripping faucet can waste over 11,000 liters of water annually. Check for and repair leaks in your home.",
+                "impact": "medium"
+            })
+        
+        if water_usage > 200:
+            suggestions["water"].append({
+                "title": "Install rainwater harvesting system",
+                "description": "Your high water usage suggests potential for rainwater collection. A basic system can collect thousands of liters annually for garden use.",
+                "impact": "high"
+            })
+        
+        suggestions["water"].append({
+            "title": "Take shorter showers",
+            "description": "Reducing shower time by just 2 minutes can save up to 40 liters of water per shower.",
+            "impact": "low"
+        })
+    
+    # General suggestions - more actionable and measurable
+    # Calculate carbon intensity (footprint per unit of activity)
+    carbon_intensity = total_footprint / max(sum(breakdown.values()), 1)
+    
+    suggestions["general"].append({
+        "title": "Track your progress with monthly carbon calculations",
+        "description": "Regular monitoring helps identify which changes have the biggest impact. Aim to reduce your footprint by 5% each month.",
+        "impact": "medium"
+    })
+    
+    # Community engagement
+    suggestions["general"].append({
+        "title": "Join a local climate action group",
+        "description": "Community efforts can provide support, amplify your impact, and create systemic change beyond individual actions.",
+        "impact": "medium"
+    })
+    
+    # Carbon offsetting for remaining emissions
+    suggestions["general"].append({
+        "title": "Consider carbon offsetting for unavoidable emissions",
+        "description": f"For your {total_footprint:.1f} kg footprint, quality carbon offset projects cost about ${total_footprint*0.015:.2f} monthly and support renewable energy, reforestation, and more.",
+        "impact": "medium"
+    })
+    
+    # Technology suggestion
+    suggestions["general"].append({
+        "title": "Use smart home technology to reduce energy waste",
+        "description": "Smart thermostats, lighting, and power strips can reduce your energy consumption by 10-15% by eliminating standby power and optimizing usage.",
+        "impact": "medium"
+    })
+    
+    # Prioritize suggestions based on highest impact areas
+    sorted_breakdown = sorted(breakdown.items(), key=lambda x: x[1], reverse=True)
+    priority_areas = [area for area, value in sorted_breakdown if value > 0]
+    
+    # Focus on high impact areas
+    if priority_areas:
+        top_area = priority_areas[0]
+        area_percentage = (breakdown.get(top_area, 0) / total_footprint) * 100 if total_footprint > 0 else 0
+        
+        suggestions["general"].insert(0, {
+            "title": f"Focus on your {top_area} footprint first",
+            "description": f"Your {top_area} activities contribute {area_percentage:.1f}% of your total footprint. Prioritizing changes in this area will have the biggest impact.",
+            "impact": "high"
+        })
+        
+        # If there's a significant second contributor
+        if len(priority_areas) > 1 and breakdown.get(priority_areas[1], 0) > (total_footprint * 0.2):
+            second_area = priority_areas[1]
+            suggestions["general"].append({
+                "title": f"Next, address your {second_area} footprint",
+                "description": f"After tackling your {top_area} footprint, focus on {second_area} for the next biggest impact reduction.",
+                "impact": "medium"
+            })
+    
+    # Personalized impact summary
+    if total_footprint > 0:
+        average_daily_footprint = 12  # kg CO2e, global average estimation
+        comparison = (total_footprint / average_daily_footprint) * 100
+        
+        if comparison > 120:
+            status = "significantly higher than"
+        elif comparison > 80:
+            status = "about average compared to"
+        else:
+            status = "lower than"
+            
+        suggestions["general"].append({
+            "title": "Understand your current impact",
+            "description": f"Your footprint is {status} the global average. Following our top 3 suggestions could reduce it by approximately {min(75, max(20, int(comparison - 70)))}%.",
+            "impact": "medium"
+        })
+    
+    return suggestions
+
+@app.route('/offsetting_sites')
+def offsetting_sites():
+    return render_template('offsetting_sites.html')
 
 # Define eco-friendly tasks and their Earth Coins
 ECO_TASKS = {

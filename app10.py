@@ -592,6 +592,7 @@ def suggestions():
     
     user = session["user"]
     
+    
     # Fetch the user's latest footprint data
     latest_footprint = footprints_collection.find_one(
         {"user": user}, 
@@ -630,146 +631,257 @@ def generate_suggestions(footprint_data):
     
     breakdown = footprint_data.get("breakdown", {})
     raw_data = footprint_data.get("raw_data", {})
+    total_footprint = footprint_data.get("total_footprint", 0)
+    
+    # Calculate daily averages for context
+    daily_transport = breakdown.get("transport", 0)
+    daily_energy = breakdown.get("energy", 0)
+    daily_food = breakdown.get("food", 0)
+    daily_waste = breakdown.get("waste", 0)
+    daily_water = breakdown.get("water", 0)
     
     # Transport suggestions
-    transport_footprint = breakdown.get("transport", 0)
-    if transport_footprint > 5:
-        suggestions["transport"].append({
-            "title": "Consider public transportation",
-            "description": "Using public transportation can reduce your transport emissions by up to 60%.",
-            "impact": "high"
-        })
-        suggestions["transport"].append({
-            "title": "Switch to cycling or walking for short trips",
-            "description": "For distances under 5km, walking or cycling produces zero emissions and improves your health.",
-            "impact": "medium"
-        })
-    
-    # Check for car usage
-    car_usage = False
-    car_type = None
-    fuel_type = None
-    
-    for transport_item in raw_data.get("transport", []):
-        if transport_item.get("mode") == "car":
-            car_usage = True
-            car_type = transport_item.get("car_type")
-            fuel_type = transport_item.get("fuel_type")
-            break
-    
-    if car_usage:
-        if fuel_type != "electric":
+    if daily_transport > 0:
+        transport_items = raw_data.get("transport", [])
+        car_usage = any(item.get("mode") == "car" for item in transport_items)
+        public_transport_usage = any(item.get("mode") == "public_transport" for item in transport_items)
+        flight_usage = any(item.get("mode") == "flight" for item in transport_items)
+        
+        if daily_transport > 8:  # High transport footprint
             suggestions["transport"].append({
-                "title": "Consider an electric vehicle",
-                "description": "Electric vehicles can reduce your transport emissions by up to 70% compared to conventional vehicles.",
-                "impact": "high"
+                "title": "🚗 Reduce car usage by 50%",
+                "description": f"Your daily transport emits {daily_transport}kg CO2e. Carpooling or combining trips could save ~{daily_transport*0.5:.1f}kg daily.",
+                "impact": "high",
+                "icon": "car",
+                "savings": daily_transport * 0.5
             })
-        if car_type in ["suv", "luxury"]:
+            
+            if not public_transport_usage:
+                suggestions["transport"].append({
+                    "title": "🚆 Try public transport 3 days/week",
+                    "description": "Switching to buses/trains for work commute can reduce transport emissions by 60-75%.",
+                    "impact": "high",
+                    "icon": "bus",
+                    "savings": daily_transport * 0.3
+                })
+                
+        elif daily_transport > 4:  # Medium transport footprint
             suggestions["transport"].append({
-                "title": "Consider a more fuel-efficient vehicle",
-                "description": f"Your {car_type} vehicle has higher emissions. A compact or medium-sized car could reduce your footprint.",
-                "impact": "medium"
+                "title": "🚲 Bike/Walk for short trips",
+                "description": "For distances under 3km, active transport produces zero emissions and improves health.",
+                "impact": "medium",
+                "icon": "bicycle",
+                "savings": 1.5  # Average savings for short trips
+            })
+        
+        if car_usage:
+            car_data = next((item for item in transport_items if item.get("mode") == "car"), {})
+            car_type = car_data.get("car_type", "medium")
+            fuel_type = car_data.get("fuel_type", "petrol")
+            
+            if fuel_type != "electric":
+                savings_potential = daily_transport * 0.7 if fuel_type in ["petrol", "diesel"] else daily_transport * 0.4
+                suggestions["transport"].append({
+                    "title": "⚡ Consider an electric/hybrid vehicle",
+                    "description": f"Your {fuel_type} car emits more than EVs. Switching could save ~{savings_potential:.1f}kg CO2e daily.",
+                    "impact": "high",
+                    "icon": "charging-station",
+                    "savings": savings_potential
+                })
+                
+            if car_type in ["suv", "luxury"]:
+                suggestions["transport"].append({
+                    "title": "🔧 Optimize vehicle maintenance",
+                    "description": "Proper tire pressure and regular servicing can improve fuel efficiency by 3-10%.",
+                    "impact": "medium",
+                    "icon": "tools",
+                    "savings": daily_transport * 0.05
+                })
+        
+        if flight_usage:
+            flight_data = next((item for item in transport_items if item.get("mode") == "flight"), {})
+            suggestions["transport"].append({
+                "title": "✈️ Reduce air travel or choose economy",
+                "description": "One round-trip flight can equal months of car emissions. Consider video conferencing or train alternatives.",
+                "impact": "high",
+                "icon": "plane",
+                "savings": daily_transport * 0.8  # Assuming occasional flights
             })
     
     # Energy suggestions
-    energy_footprint = breakdown.get("energy", 0)
-    if energy_footprint > 3:
-        suggestions["energy"].append({
-            "title": "Switch to renewable energy sources",
-            "description": "Renewable energy can reduce your electricity footprint by up to 90%.",
-            "impact": "high"
-        })
+    if daily_energy > 0:
+        energy_items = raw_data.get("energy", [])
+        electricity_sources = [item.get("electricity_source") for item in energy_items]
+        cooking_fuels = [item.get("cooking_fuel") for item in energy_items]
         
-    for energy_item in raw_data.get("energy", []):
-        electricity_source = energy_item.get("electricity_source")
-        if electricity_source == "non_renewable_electricity":
+        if daily_energy > 6:  # High energy footprint
+            if "non_renewable_electricity" in electricity_sources:
+                suggestions["energy"].append({
+                    "title": "☀️ Switch to renewable energy",
+                    "description": f"Your electricity emits {daily_energy*0.7:.1f}kg daily. Green energy could save ~{daily_energy*0.6:.1f}kg.",
+                    "impact": "high",
+                    "icon": "solar-panel",
+                    "savings": daily_energy * 0.6
+                })
+                
             suggestions["energy"].append({
-                "title": "Install solar panels",
-                "description": "Solar panels can significantly reduce your dependence on non-renewable electricity.",
-                "impact": "high"
+                "title": "💡 Upgrade to LED lighting",
+                "description": "LED bulbs use 75% less energy and last 25x longer than incandescent.",
+                "impact": "medium",
+                "icon": "lightbulb",
+                "savings": 0.5  # Average daily savings
             })
         
-        cooking_fuel = energy_item.get("cooking_fuel")
-        if cooking_fuel in ["wood", "lpg"]:
+        # Cooking suggestions
+        if "wood" in cooking_fuels:
             suggestions["energy"].append({
-                "title": "Switch to electric cooking",
-                "description": f"Your {cooking_fuel} cooking produces higher emissions. Electric cooking with renewable electricity is cleaner.",
-                "impact": "medium"
+                "title": "♨️ Switch to cleaner cooking fuel",
+                "description": "Wood burning produces high emissions. LPG or induction cooking would be cleaner alternatives.",
+                "impact": "high",
+                "icon": "fire",
+                "savings": daily_energy * 0.3
+            })
+        
+        # Heating/cooling suggestions
+        if daily_energy > 4:
+            suggestions["energy"].append({
+                "title": "🌡️ Adjust thermostat by 2°C",
+                "description": "Each degree adjustment can save 3-5% on heating/cooling energy use.",
+                "impact": "medium",
+                "icon": "temperature-low",
+                "savings": daily_energy * 0.1
             })
     
     # Food suggestions
-    food_footprint = breakdown.get("food", 0)
-    diet_type = raw_data.get("food", {}).get("diet")
-    
-    if diet_type == "meat_diet":
+    if daily_food > 0:
+        diet_type = raw_data.get("food", {}).get("diet", "meat_diet")
+        food_amount = raw_data.get("food", {}).get("amount", 1)
+        
+        if diet_type == "meat_diet" and daily_food > 3:
+            suggestions["food"].append({
+                "title": "🍖 Have meat-free days",
+                "description": f"Your current diet emits {daily_food}kg daily. 2 meat-free days could save ~{(daily_food-1.5)*2:.1f}kg weekly.",
+                "impact": "high",
+                "icon": "calendar-minus",
+                "savings": (daily_food - 1.5) * 2 / 7  # Daily average for 2 days/week
+            })
+            
+            suggestions["food"].append({
+                "title": "🥩 Reduce red meat consumption",
+                "description": "Beef emits 5x more than poultry. Switching half your red meat could save ~1kg CO2e daily.",
+                "impact": "high",
+                "icon": "hamburger",
+                "savings": 1.0
+            })
+        
+        elif diet_type == "vegetarian_diet":
+            suggestions["food"].append({
+                "title": "🧀 Choose plant-based dairy",
+                "description": "Dairy accounts for most vegetarian emissions. Plant milks emit 1/3 the CO2 of cow's milk.",
+                "impact": "medium",
+                "icon": "seedling",
+                "savings": 0.5
+            })
+        
         suggestions["food"].append({
-            "title": "Reduce meat consumption",
-            "description": "Reducing meat consumption, especially red meat, can lower your food carbon footprint by up to 50%.",
-            "impact": "high"
+            "title": "🛒 Reduce food waste",
+            "description": "The average household wastes 30% of food purchased. Meal planning can significantly cut emissions.",
+            "impact": "medium",
+            "icon": "trash-alt",
+            "savings": daily_food * 0.15
         })
-    elif diet_type == "vegetarian_diet":
-        suggestions["food"].append({
-            "title": "Consider plant-based alternatives",
-            "description": "Incorporating more plant-based foods can further reduce your food carbon footprint.",
-            "impact": "medium"
-        })
-    
-    suggestions["food"].append({
-        "title": "Buy local and seasonal produce",
-        "description": "Local food requires less transportation and seasonal produce requires less energy-intensive farming methods.",
-        "impact": "medium"
-    })
     
     # Waste suggestions
-    waste_footprint = breakdown.get("waste", 0)
-    if waste_footprint > 2:
+    if daily_waste > 0:
+        if daily_waste > 2:
+            suggestions["waste"].append({
+                "title": "♻️ Improve recycling habits",
+                "description": f"Your waste emits {daily_waste}kg daily. Proper recycling could save ~{daily_waste*0.3:.1f}kg.",
+                "impact": "high",
+                "icon": "recycle",
+                "savings": daily_waste * 0.3
+            })
+            
+            suggestions["waste"].append({
+                "title": "🍂 Start composting",
+                "description": "Composting food scraps can divert 30% of household waste from landfills.",
+                "impact": "medium",
+                "icon": "leaf",
+                "savings": daily_waste * 0.2
+            })
+        
         suggestions["waste"].append({
-            "title": "Implement composting",
-            "description": "Composting organic waste can reduce your waste footprint and create nutrient-rich soil for plants.",
-            "impact": "high"
-        })
-        suggestions["waste"].append({
-            "title": "Practice zero-waste shopping",
-            "description": "Bring your own containers and bags to reduce packaging waste.",
-            "impact": "medium"
+            "title": "🛍️ Bring reusable bags/containers",
+            "description": "Single-use plastics create long-term waste. Reusables eliminate this waste stream.",
+            "impact": "medium",
+            "icon": "shopping-bag",
+            "savings": 0.3
         })
     
     # Water suggestions
-    water_footprint = breakdown.get("water", 0)
-    if water_footprint > 1.5:
+    if daily_water > 0:
+        if daily_water > 1.5:
+            suggestions["water"].append({
+                "title": "🚿 Install water-saving showerhead",
+                "description": f"Your water use emits {daily_water}kg daily. Efficient fixtures could save ~{daily_water*0.4:.1f}kg.",
+                "impact": "high",
+                "icon": "shower",
+                "savings": daily_water * 0.4
+            })
+            
+            suggestions["water"].append({
+                "title": "🚰 Fix any leaks",
+                "description": "A dripping faucet can waste 20+ liters daily. Prompt repairs prevent this waste.",
+                "impact": "medium",
+                "icon": "faucet",
+                "savings": daily_water * 0.2
+            })
+        
         suggestions["water"].append({
-            "title": "Install water-efficient fixtures",
-            "description": "Low-flow showerheads and faucets can reduce your water usage by up to 50%.",
-            "impact": "high"
-        })
-        suggestions["water"].append({
-            "title": "Collect rainwater for gardening",
-            "description": "Using rainwater for your garden can significantly reduce your water footprint.",
-            "impact": "medium"
+            "title": "🌱 Water plants in morning/evening",
+            "description": "Reduces evaporation loss by 30%, meaning less water needed overall.",
+            "impact": "low",
+            "icon": "tint",
+            "savings": 0.1
         })
     
-    # General suggestions (always included)
+    # General suggestions
+    priority_area = max(breakdown.items(), key=lambda x: x[1])[0] if breakdown else None
+    
     suggestions["general"].append({
-        "title": "Track your carbon footprint regularly",
-        "description": "Regular monitoring helps you stay aware of your impact and motivates sustainable choices.",
-        "impact": "low"
-    })
-    suggestions["general"].append({
-        "title": "Join a local sustainability group",
-        "description": "Community efforts can amplify your individual impact and provide support for sustainable living.",
-        "impact": "medium"
+        "title": "📊 Track your progress weekly",
+        "description": "Regular monitoring helps maintain motivation and shows which changes have most impact.",
+        "impact": "low",
+        "icon": "chart-line",
+        "savings": 0  # Motivational
     })
     
-    # Prioritize suggestions based on highest impact areas
-    sorted_breakdown = sorted(breakdown.items(), key=lambda x: x[1], reverse=True)
-    priority_areas = [area for area, value in sorted_breakdown if value > 0]
-    
-    # Add this information to help user focus on high impact areas
-    if priority_areas:
+    if priority_area:
         suggestions["general"].append({
-            "title": f"Focus on reducing your {priority_areas[0]} footprint",
-            "description": f"Your {priority_areas[0]} usage contributes the most to your carbon footprint. Small changes here will have the biggest impact.",
-            "impact": "high"
+            "title": f"🎯 Focus on {priority_area} reductions",
+            "description": f"Your {priority_area} footprint is your largest at {breakdown[priority_area]:.1f}kg daily. Small changes here will have biggest impact.",
+            "impact": "high",
+            "icon": "crosshairs",
+            "savings": breakdown[priority_area] * 0.2  # Estimated 20% reduction
+        })
+    
+    # Add seasonal suggestions
+    current_month = datetime.now().month
+    if current_month in [6, 7, 8]:  # Summer
+        suggestions["general"].append({
+            "title": "❄️ Set AC to 24°C (75°F)",
+            "description": "Each degree cooler increases energy use by 3-5%. Use fans to feel 4°C cooler without extra AC.",
+            "impact": "medium",
+            "icon": "fan",
+            "savings": 0.8
+        })
+    elif current_month in [12, 1, 2]:  # Winter
+        suggestions["general"].append({
+            "title": "🧣 Lower thermostat by 2°C",
+            "description": "Wearing warmer clothes allows lower heating settings, saving 5-10% on energy bills.",
+            "impact": "medium",
+            "icon": "mitten",
+            "savings": 0.7
         })
     
     return suggestions

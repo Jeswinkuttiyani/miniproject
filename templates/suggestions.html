@@ -4,15 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Carbon Track - Personalized Suggestions</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --primary-color: #2E7D32;
+      --primary-dark: #1B5E20;
       --secondary-color: #4CAF50;
       --accent-color: #81C784;
       --light-bg: #F1F8E9;
       --dark-text: #263238;
       --light-text: #FFFFFF;
-      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.15);
+      --transition: all 0.3s ease;
     }
     
     * {
@@ -23,8 +27,9 @@
     }
     
     body {
-      background-color: #f5f5f5;
+      background-color: var(--light-bg);
       color: var(--dark-text);
+      line-height: 1.6;
     }
     
     /* Main Content */
@@ -52,13 +57,14 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background-color: var(--secondary-color);
+      background-color: var(--primary-dark);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: bold;
       font-size: 20px;
+      box-shadow: var(--shadow);
     }
     
     .user-info h3 {
@@ -84,16 +90,20 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      transition: all 0.3s;
+      transition: var(--transition);
+      font-weight: 500;
     }
     
     .btn-primary {
       background-color: var(--primary-color);
       color: white;
+      box-shadow: var(--shadow);
     }
     
     .btn-primary:hover {
-      background-color: var(--secondary-color);
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
     }
     
     .chart-container {
@@ -106,20 +116,29 @@
       background-color: white;
       border-radius: 12px;
       box-shadow: var(--shadow);
-      padding: 20px;
+      padding: 25px;
       margin-bottom: 24px;
+      transition: var(--transition);
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
     }
     
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
     
     .card-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 600;
+      color: var(--primary-dark);
     }
     
     .summary-grid {
@@ -130,73 +149,102 @@
     }
     
     .header-section {
-      background-color: var(--primary-color);
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
       color: white;
-      padding: 30px 20px;
+      padding: 40px 20px;
       border-radius: 12px;
-      margin-bottom: 30px;
+      margin-bottom: 40px;
       text-align: center;
+      box-shadow: var(--shadow);
     }
     
     .header-section h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
+      font-size: 32px;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+    
+    .header-section p {
+      font-size: 18px;
+      max-width: 700px;
+      margin: 0 auto;
+      opacity: 0.9;
     }
     
     .alert {
-      padding: 15px;
+      padding: 15px 20px;
       border-radius: 8px;
-      margin-top: 15px;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .alert i {
+      font-size: 24px;
     }
     
     .alert-danger {
       background-color: #ffebee;
-      border-left: 4px solid #f44336;
+      border-left: 5px solid #f44336;
+      color: #c62828;
     }
     
     .alert-warning {
       background-color: #fff8e1;
-      border-left: 4px solid #ffc107;
+      border-left: 5px solid #ffc107;
+      color: #e65100;
     }
     
     .alert-success {
       background-color: #e8f5e9;
-      border-left: 4px solid #4caf50;
+      border-left: 5px solid #4caf50;
+      color: #2E7D32;
     }
     
     .categories-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
     }
     
     .suggestion-item {
       background-color: white;
-      padding: 15px;
+      padding: 20px;
       border-radius: 8px;
       box-shadow: var(--shadow);
-      transition: transform 0.3s;
-      margin-bottom: 15px;
+      transition: var(--transition);
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
     }
     
     .suggestion-item:hover {
-      transform: translateY(-2px);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
     }
     
     .suggestion-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .suggestion-header h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--dark-text);
     }
     
     .impact-badge {
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 20px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .high-badge {
@@ -216,12 +264,14 @@
     
     .category-header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
     
     .category-icon {
-      font-size: 30px;
-      margin-bottom: 10px;
+      font-size: 40px;
+      margin-bottom: 15px;
       display: block;
     }
     
@@ -233,49 +283,172 @@
     .general-icon { color: #607d8b; }
     
     .high-impact {
-      border-left: 4px solid #f44336;
+      border-left: 5px solid #f44336;
     }
     
     .medium-impact {
-      border-left: 4px solid #ff9800;
+      border-left: 5px solid #ff9800;
     }
     
     .low-impact {
-      border-left: 4px solid var(--secondary-color);
+      border-left: 5px solid var(--secondary-color);
     }
     
     .action-section {
       text-align: center;
-      margin: 40px 0;
+      margin: 50px 0 30px;
+      padding: 30px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    
+    .action-section h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: var(--primary-dark);
+    }
+    
+    .action-section p {
+      font-size: 18px;
+      margin-bottom: 30px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
     
     .action-btn {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 12px 24px;
+      padding: 15px 30px;
       border-radius: 8px;
       background-color: var(--primary-color);
       color: var(--light-text);
       border: none;
       cursor: pointer;
-      font-weight: 500;
+      font-weight: 600;
       font-size: 16px;
-      transition: background-color 0.3s;
+      transition: var(--transition);
       text-decoration: none;
       margin: 0 10px;
+      box-shadow: var(--shadow);
     }
     
     .action-btn:hover {
-      background-color: var(--secondary-color);
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
     }
     
     .footer {
       background-color: var(--dark-text);
       color: var(--light-text);
       text-align: center;
-      padding: 20px;
-      margin-top: 40px;
+      padding: 25px;
+      margin-top: 60px;
+    }
+    
+    .footer p {
+      opacity: 0.8;
+    }
+    
+    .savings-estimate {
+      font-size: 14px;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 6px;
+      display: inline-block;
+    }
+    
+    .savings-high {
+      background-color: rgba(244, 67, 54, 0.1);
+      color: #c62828;
+    }
+    
+    .savings-medium {
+      background-color: rgba(255, 152, 0, 0.1);
+      color: #e65100;
+    }
+    
+    .savings-low {
+      background-color: rgba(76, 175, 80, 0.1);
+      color: #2E7D32;
+    }
+    
+    .priority-tag {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 5px 10px;
+      border-bottom-left-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+    }
+    
+    .priority-high {
+      background-color: #f44336;
+    }
+    
+    .priority-medium {
+      background-color: #ff9800;
+    }
+    
+    .priority-low {
+      background-color: var(--secondary-color);
+    }
+    
+    .progress-container {
+      width: 100%;
+      height: 8px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      margin-top: 15px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    
+    .progress-high {
+      background-color: #f44336;
+    }
+    
+    .progress-medium {
+      background-color: #ff9800;
+    }
+    
+    .progress-low {
+      background-color: var(--secondary-color);
+    }
+    
+    @media (max-width: 768px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-section h1 {
+        font-size: 26px;
+      }
+      
+      .header-section p {
+        font-size: 16px;
+      }
+      
+      .action-btn {
+        margin-bottom: 15px;
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .action-section {
+        padding: 20px 15px;
+      }
     }
   </style>
 </head>
@@ -290,12 +463,17 @@
           <p>Carbon Tracker</p>
         </div>
       </div>
+      <div class="buttons">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+      </div>
     </div>
     
     <!-- Header Section -->
     <div class="header-section">
       <h1>Your Personalized Eco-Suggestions</h1>
-      <p>Based on your carbon footprint analysis, here are tailored recommendations to help you reduce your environmental impact.</p>
+      <p>Based on your carbon footprint analysis, here are tailored recommendations to help you reduce your environmental impact and track your progress.</p>
     </div>
     
     <!-- Footprint Summary -->
@@ -303,36 +481,57 @@
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">Your Carbon Footprint Breakdown</h2>
+          <i class="fas fa-chart-pie" style="color: var(--primary-color); font-size: 24px;"></i>
         </div>
         <div class="chart-container">
           <canvas id="footprintChart"></canvas>
         </div>
         <div style="text-align: center; margin-top: 15px;">
-          <h3>Total Footprint: <span style="color: var(--primary-color);">{{ total_footprint|round(2) }} kg CO2e</span></h3>
+          <h3>Total Footprint: <span style="color: var(--primary-color); font-weight: 700;">{{ total_footprint|round(2) }} kg CO2e</span></h3>
+          <p style="margin-top: 5px; font-size: 14px; color: #666;">Daily average</p>
         </div>
       </div>
       
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">What Your Footprint Means</h2>
+          <i class="fas fa-info-circle" style="color: var(--primary-color); font-size: 24px;"></i>
         </div>
-        <p>Your carbon footprint is a measure of the greenhouse gases generated by your daily activities. The global average is about 4,000 kg CO2e per person annually.</p>
+        <p>Your carbon footprint measures the greenhouse gases generated by your daily activities. The global average is about 4,000 kg CO2e per person annually (≈11 kg daily).</p>
         
         {% if total_footprint > 15 %}
         <div class="alert alert-danger">
-          <strong>Your footprint is relatively high.</strong> Implementing the suggestions below can significantly reduce your environmental impact.
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>
+            <strong>Your footprint is relatively high.</strong> Implementing the suggestions below can significantly reduce your environmental impact. Focus on high-impact areas first.
+          </div>
         </div>
         {% elif total_footprint > 8 %}
         <div class="alert alert-warning">
-          <strong>Your footprint is moderate.</strong> You're on the right track, but there's room for improvement.
+          <i class="fas fa-exclamation-circle"></i>
+          <div>
+            <strong>Your footprint is moderate.</strong> You're on the right track, but there's room for improvement. The suggestions below will help you make meaningful changes.
+          </div>
         </div>
         {% else %}
         <div class="alert alert-success">
-          <strong>Your footprint is relatively low!</strong> Great job being environmentally conscious.
+          <i class="fas fa-check-circle"></i>
+          <div>
+            <strong>Your footprint is relatively low!</strong> Great job being environmentally conscious. Keep up the good work with these additional suggestions.
+          </div>
         </div>
         {% endif %}
         
-        <p style="margin-top: 15px;">The suggestions below are personalized based on your specific carbon footprint profile. Focus on high-impact areas first for the most significant reductions.</p>
+        <div class="progress-container">
+          <div class="progress-bar 
+            {% if total_footprint > 15 %}progress-high
+            {% elif total_footprint > 8 %}progress-medium
+            {% else %}progress-low{% endif %}" 
+            style="width: {% if total_footprint > 15 %}100%
+            {% elif total_footprint > 8 %}65%
+            {% else %}30%{% endif %}">
+          </div>
+        </div>
       </div>
     </div>
     
@@ -341,17 +540,28 @@
       {% if suggestions.transport %}
       <div class="card">
         <div class="category-header">
-          <i class="fas fa-car-side category-icon transport-icon"></i>
+          <i class="fas fa-car-alt category-icon transport-icon"></i>
           <h2 class="card-title">Transport</h2>
+          <p>Your transport contributes {{ footprint_breakdown.get('transport', 0)|round(2) }} kg CO2e ({{ ((footprint_breakdown.get('transport', 0)/total_footprint)*100)|round(0) }}%)</p>
         </div>
         
         {% for suggestion in suggestions.transport %}
         <div class="suggestion-item {{ suggestion.impact }}-impact">
+          <div class="priority-tag {{ suggestion.impact }}-badge">
+            {% if suggestion.impact == 'high' %}Top Priority{% endif %}
+            {% if suggestion.impact == 'medium' %}Consider{% endif %}
+            {% if suggestion.impact == 'low' %}Good Practice{% endif %}
+          </div>
           <div class="suggestion-header">
-            <h3>{{ suggestion.title }}</h3>
+            <h3><i class="fas fa-{{ suggestion.icon|default('lightbulb') }}"></i> {{ suggestion.title }}</h3>
             <span class="impact-badge {{ suggestion.impact }}-badge">{{ suggestion.impact }}</span>
           </div>
           <p>{{ suggestion.description }}</p>
+          {% if suggestion.savings %}
+          <div class="savings-estimate savings-{{ suggestion.impact }}">
+            <i class="fas fa-leaf"></i> Potential savings: ~{{ suggestion.savings }} kg CO2e
+          </div>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
@@ -363,15 +573,26 @@
         <div class="category-header">
           <i class="fas fa-bolt category-icon energy-icon"></i>
           <h2 class="card-title">Energy</h2>
+          <p>Your energy use contributes {{ footprint_breakdown.get('energy', 0)|round(2) }} kg CO2e ({{ ((footprint_breakdown.get('energy', 0)/total_footprint)*100)|round(0) }}%)</p>
         </div>
         
         {% for suggestion in suggestions.energy %}
         <div class="suggestion-item {{ suggestion.impact }}-impact">
+          <div class="priority-tag {{ suggestion.impact }}-badge">
+            {% if suggestion.impact == 'high' %}Top Priority{% endif %}
+            {% if suggestion.impact == 'medium' %}Consider{% endif %}
+            {% if suggestion.impact == 'low' %}Good Practice{% endif %}
+          </div>
           <div class="suggestion-header">
-            <h3>{{ suggestion.title }}</h3>
+            <h3><i class="fas fa-{{ suggestion.icon|default('lightbulb') }}"></i> {{ suggestion.title }}</h3>
             <span class="impact-badge {{ suggestion.impact }}-badge">{{ suggestion.impact }}</span>
           </div>
           <p>{{ suggestion.description }}</p>
+          {% if suggestion.savings %}
+          <div class="savings-estimate savings-{{ suggestion.impact }}">
+            <i class="fas fa-leaf"></i> Potential savings: ~{{ suggestion.savings }} kg CO2e
+          </div>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
@@ -383,15 +604,26 @@
         <div class="category-header">
           <i class="fas fa-utensils category-icon food-icon"></i>
           <h2 class="card-title">Food</h2>
+          <p>Your food choices contribute {{ footprint_breakdown.get('food', 0)|round(2) }} kg CO2e ({{ ((footprint_breakdown.get('food', 0)/total_footprint)*100)|round(0) }}%)</p>
         </div>
         
         {% for suggestion in suggestions.food %}
         <div class="suggestion-item {{ suggestion.impact }}-impact">
+          <div class="priority-tag {{ suggestion.impact }}-badge">
+            {% if suggestion.impact == 'high' %}Top Priority{% endif %}
+            {% if suggestion.impact == 'medium' %}Consider{% endif %}
+            {% if suggestion.impact == 'low' %}Good Practice{% endif %}
+          </div>
           <div class="suggestion-header">
-            <h3>{{ suggestion.title }}</h3>
+            <h3><i class="fas fa-{{ suggestion.icon|default('lightbulb') }}"></i> {{ suggestion.title }}</h3>
             <span class="impact-badge {{ suggestion.impact }}-badge">{{ suggestion.impact }}</span>
           </div>
           <p>{{ suggestion.description }}</p>
+          {% if suggestion.savings %}
+          <div class="savings-estimate savings-{{ suggestion.impact }}">
+            <i class="fas fa-leaf"></i> Potential savings: ~{{ suggestion.savings }} kg CO2e
+          </div>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
@@ -404,17 +636,28 @@
       {% if suggestions.waste %}
       <div class="card">
         <div class="category-header">
-          <i class="fas fa-trash-alt category-icon waste-icon"></i>
+          <i class="fas fa-recycle category-icon waste-icon"></i>
           <h2 class="card-title">Waste</h2>
+          <p>Your waste contributes {{ footprint_breakdown.get('waste', 0)|round(2) }} kg CO2e ({{ ((footprint_breakdown.get('waste', 0)/total_footprint)*100)|round(0) }}%)</p>
         </div>
         
         {% for suggestion in suggestions.waste %}
         <div class="suggestion-item {{ suggestion.impact }}-impact">
+          <div class="priority-tag {{ suggestion.impact }}-badge">
+            {% if suggestion.impact == 'high' %}Top Priority{% endif %}
+            {% if suggestion.impact == 'medium' %}Consider{% endif %}
+            {% if suggestion.impact == 'low' %}Good Practice{% endif %}
+          </div>
           <div class="suggestion-header">
-            <h3>{{ suggestion.title }}</h3>
+            <h3><i class="fas fa-{{ suggestion.icon|default('lightbulb') }}"></i> {{ suggestion.title }}</h3>
             <span class="impact-badge {{ suggestion.impact }}-badge">{{ suggestion.impact }}</span>
           </div>
           <p>{{ suggestion.description }}</p>
+          {% if suggestion.savings %}
+          <div class="savings-estimate savings-{{ suggestion.impact }}">
+            <i class="fas fa-leaf"></i> Potential savings: ~{{ suggestion.savings }} kg CO2e
+          </div>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
@@ -426,15 +669,26 @@
         <div class="category-header">
           <i class="fas fa-tint category-icon water-icon"></i>
           <h2 class="card-title">Water</h2>
+          <p>Your water use contributes {{ footprint_breakdown.get('water', 0)|round(2) }} kg CO2e ({{ ((footprint_breakdown.get('water', 0)/total_footprint)*100)|round(0) }}%)</p>
         </div>
         
         {% for suggestion in suggestions.water %}
         <div class="suggestion-item {{ suggestion.impact }}-impact">
+          <div class="priority-tag {{ suggestion.impact }}-badge">
+            {% if suggestion.impact == 'high' %}Top Priority{% endif %}
+            {% if suggestion.impact == 'medium' %}Consider{% endif %}
+            {% if suggestion.impact == 'low' %}Good Practice{% endif %}
+          </div>
           <div class="suggestion-header">
-            <h3>{{ suggestion.title }}</h3>
+            <h3><i class="fas fa-{{ suggestion.icon|default('lightbulb') }}"></i> {{ suggestion.title }}</h3>
             <span class="impact-badge {{ suggestion.impact }}-badge">{{ suggestion.impact }}</span>
           </div>
           <p>{{ suggestion.description }}</p>
+          {% if suggestion.savings %}
+          <div class="savings-estimate savings-{{ suggestion.impact }}">
+            <i class="fas fa-leaf"></i> Potential savings: ~{{ suggestion.savings }} kg CO2e
+          </div>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
@@ -446,15 +700,26 @@
         <div class="category-header">
           <i class="fas fa-globe-americas category-icon general-icon"></i>
           <h2 class="card-title">General Tips</h2>
+          <p>Additional ways to reduce your environmental impact</p>
         </div>
         
         {% for suggestion in suggestions.general %}
         <div class="suggestion-item {{ suggestion.impact }}-impact">
+          <div class="priority-tag {{ suggestion.impact }}-badge">
+            {% if suggestion.impact == 'high' %}Top Priority{% endif %}
+            {% if suggestion.impact == 'medium' %}Consider{% endif %}
+            {% if suggestion.impact == 'low' %}Good Practice{% endif %}
+          </div>
           <div class="suggestion-header">
-            <h3>{{ suggestion.title }}</h3>
+            <h3><i class="fas fa-{{ suggestion.icon|default('lightbulb') }}"></i> {{ suggestion.title }}</h3>
             <span class="impact-badge {{ suggestion.impact }}-badge">{{ suggestion.impact }}</span>
           </div>
           <p>{{ suggestion.description }}</p>
+          {% if suggestion.savings %}
+          <div class="savings-estimate savings-{{ suggestion.impact }}">
+            <i class="fas fa-leaf"></i> Potential savings: ~{{ suggestion.savings }} kg CO2e
+          </div>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
@@ -463,35 +728,24 @@
     
     <!-- Taking Action Section -->
     <div class="action-section">
-      <h2 style="margin-bottom: 20px;">Ready to Make a Difference?</h2>
-      <p style="margin-bottom: 20px; font-size: 18px;">Track your progress and earn Earth Coins by completing eco-friendly tasks!</p>
-      <a href="{{ url_for('tasks') }}" class="action-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2v8"></path>
-          <path d="m4.93 10.93 1.41 1.41"></path>
-          <path d="M2 18h2"></path>
-          <path d="M20 18h2"></path>
-          <path d="m19.07 10.93-1.41 1.41"></path>
-          <path d="M22 22H2"></path>
-          <path d="M16 6 8 14l-4 4"></path>
-          <path d="m8 6 8 8"></path>
-        </svg>
-        Eco Tasks
-      </a>
-      <a href="{{ url_for('dashboard') }}" class="action-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="3" y1="9" x2="21" y2="9"></line>
-          <line x1="9" y1="21" x2="9" y2="9"></line>
-        </svg>
-        Dashboard
-      </a>
+      <h2>Ready to Make a Difference?</h2>
+      <p>Track your progress and earn Earth Coins by completing eco-friendly tasks! Small changes add up to big impacts over time.</p>
+      <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+        <a href="{{ url_for('tasks') }}" class="action-btn">
+          <i class="fas fa-tasks"></i> Eco Tasks
+        </a>
+      </div>
     </div>
   </main>
   
   <!-- Footer -->
   <div class="footer">
     <p>© 2025 Carbon Track | Helping you live more sustainably</p>
+    <p style="margin-top: 10px; font-size: 14px;">
+      <a href="#" style="color: var(--accent-color); text-decoration: none;">Privacy Policy</a> | 
+      <a href="#" style="color: var(--accent-color); text-decoration: none;">Terms of Service</a> | 
+      <a href="#" style="color: var(--accent-color); text-decoration: none;">Contact Us</a>
+    </p>
   </div>
   
   <!-- Scripts -->
@@ -521,21 +775,31 @@
               footprintData.water
             ],
             backgroundColor: [
-              '#1976d2',  // Transport - Blue
-              '#ff9800',  // Energy - Orange
-              '#4CAF50',  // Food - Green
-              '#9c27b0',  // Waste - Purple
-              '#00bcd4'   // Water - Teal
+                '#4CAF50',  // Transport - Blue
+              '#2196F3',  // Energy - Amber
+              '#FFC107',  // Food - Emerald
+              ' #9C27B0',  // Waste - Violet
+              '#F44336'   // Water - Cyan
             ],
-            borderWidth: 1
+            borderWidth: 0,
+            hoverOffset: 15
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          cutout: '65%',
           plugins: {
             legend: {
-              position: 'bottom'
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                usePointStyle: true,
+                pointStyle: 'circle',
+                font: {
+                  size: 13
+                }
+              }
             },
             tooltip: {
               callbacks: {
@@ -546,10 +810,36 @@
                   var percentage = Math.round((context.raw / total) * 100);
                   return `${label}: ${value} kg CO2e (${percentage}%)`;
                 }
+              },
+              bodyFont: {
+                size: 14
+              },
+              titleFont: {
+                size: 16,
+                weight: 'bold'
               }
             }
           }
         }
+      });
+      
+      // Add animation to suggestion items when they come into view
+      const suggestionItems = document.querySelectorAll('.suggestion-item');
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      suggestionItems.forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(item);
       });
     });
   </script>
